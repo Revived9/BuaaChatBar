@@ -2,14 +2,20 @@
   <header class="app-header">
     <div class="header-content">
       <div class="logo" @click="goToHome">
-        <img src="@/assets/logo.svg" alt="航吧" class="logo-image">
+        <img src="@/assets/logo.png" alt="航吧" class="logo-image">
       </div>
       <nav>
-        <router-link to="/" class="nav-item">全部讨论</router-link>
-        <router-link to="/tags" class="nav-item">标签</router-link>
+        <router-link to="/" class="nav-item" :class="{ active: isActive === 'all' }"
+          @click="setActive('all')">全部讨论</router-link>
+        <router-link to="/tags" class="nav-item" :class="{ active: isActive === 'tags' }"
+          @click="setActive('tags')">标签</router-link>
       </nav>
       <div class="user-actions">
-        <input type="text" placeholder="搜索" class="search-input" />
+        <div class="search-container">
+          <input type="text" placeholder="搜索" class="search-input" v-model="searchQuery" />
+          <i class="iconfont icon-search" @click="performSearch"></i>
+        </div>
+        <!-- <template v-if="false"> -->
         <template v-if="!isLoggedIn">
           <button @click="showLoginDialog" class="btn btn-login">登录</button>
           <button @click="showRegisterDialog" class="btn btn-register">注册</button>
@@ -31,6 +37,8 @@
   <RegisterDialog v-if="isRegisterDialogVisible" @close="closeRegisterDialog" />
 </template>
 
+ 
+
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
@@ -50,6 +58,8 @@ const isLoginDialogVisible = ref(false)
 const isRegisterDialogVisible = ref(false)
 const isDropdownOpen = ref(false)
 const dropdownRef = ref(null)
+const isActive = ref('all')
+const searchQuery = ref('')
 
 const showLoginDialog = () => {
   isLoginDialogVisible.value = true
@@ -67,12 +77,34 @@ const closeRegisterDialog = () => {
   isRegisterDialogVisible.value = false
 }
 
+async function sendDataToBackend() {
+      // 准备要发送的数据，这里简单地创建一个JSON对象
+      const userData = {
+        username: 'john_doe',
+        email: 'john.doe@example.com'
+      };
+ 
+      // 使用Fetch API发送POST请求到后端
+      const response = await fetch('http://localhost:5173/', {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+ 
+      // 解析后端返回的JSON响应
+      const responseData = await response.json();
+ 
+      // 打印后端返回的数据
+      console.log(responseData);
+    }
+
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
 }
 
 const handleLogout = () => {
-  store.dispatch('logout')
+  store.dispatch('user/logout')
   router.push('/')
   isDropdownOpen.value = false
 }
@@ -87,6 +119,17 @@ const goToHome = () => {
   router.push('/')
 }
 
+const setActive = (item) => {
+  isActive.value = item
+}
+
+const performSearch = () => {
+  if (searchQuery.value.trim()) {
+    console.log('搜索:', searchQuery.value)
+    // 在这里实现搜索的逻辑，比如导航到搜索结果页面
+  }
+}
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
@@ -95,6 +138,7 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
+
 
 <style scoped>
 .app-header {
@@ -139,7 +183,8 @@ nav {
   transition: background-color 0.2s;
 }
 
-.nav-item:hover, .nav-item.router-link-active {
+.nav-item:hover,
+.nav-item.active {
   background-color: var(--secondary-color);
 }
 
@@ -149,11 +194,31 @@ nav {
   gap: 10px;
 }
 
+.search-container {
+  position: relative;
+}
+
 .search-input {
   padding: 5px 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.9rem;
+}
+
+.search-input:hover {
+  border-color: var(--primary-color); /* 定义悬浮时的边框色 */
+}
+
+.icon-search {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  color: #888;
+  /* 设置图标颜色为灰色 */
 }
 
 .btn {
@@ -175,6 +240,12 @@ nav {
   color: #fff;
 }
 
+.btn-login:hover,
+.btn-register:hover {
+  background-color: blue; /* 自定义悬浮时的颜色 */
+  color: white; /* 鼠标悬浮时文本颜色 */
+}
+
 .user-info-dropdown {
   position: relative;
 }
@@ -182,19 +253,21 @@ nav {
 .user-info {
   display: flex;
   align-items: center;
-  gap: 6px; /* 减小头像和昵称之间的间隙 */
-  padding: 3px 10px 3px 3px; /* 减小左侧内边距，保持右侧内边距 */
+  gap: 6px;
+  padding: 3px 10px 3px 3px;
   border-radius: 20px;
   background-color: white;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
-.user-info:hover, .user-info.active {
+.user-info:hover,
+.user-info.active {
   background-color: var(--primary-color);
 }
 
-.user-info:hover .username, .user-info.active .username {
+.user-info:hover .username,
+.user-info.active .username {
   color: white;
 }
 
@@ -209,7 +282,7 @@ nav {
   font-weight: 500;
   color: var(--text-color);
   transition: color 0.3s;
-  font-size: 0.9rem; /* 可以稍微减小字体大小以适应更紧凑的布局 */
+  font-size: 0.9rem;
 }
 
 .dropdown-menu {
@@ -218,7 +291,7 @@ nav {
   right: 0;
   background-color: white;
   border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   padding: 10px 0;
   z-index: 1000;
 }
@@ -248,7 +321,8 @@ nav {
     gap: 10px;
   }
 
-  nav, .user-actions {
+  nav,
+  .user-actions {
     width: 100%;
     justify-content: center;
   }

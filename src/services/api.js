@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://your-backend-api-url', // 替换为实际的后端 API 地址
+  baseURL: 'http://127.0.0.1:8000/', // 替换为实际的后端 API 地址
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
@@ -38,24 +38,44 @@ export const login = (credentials) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (credentials.studentId === '123' && credentials.password === '123456') {
+        const userData = {
+          studentId: '123',
+          username: 'Nameless9',
+          avatar: '/src/assets/profile.png'
+        }
+        
         resolve({
           data: {
+            code: 1,
             token: 'fake-jwt-token',
-            user: {
-              studentId: '123',
-              username: '测试用户',
-              avatar: 'https://example.com/avatar.jpg'
-            }
+            user: userData,
+            message: '登录成功'
           }
         });
       } else {
-        reject({ message: '学号或密码错误' });
+        reject({
+          data: {
+            code: 0,
+            message: '学号或密码错误'
+          }
+        });
       }
-    }, 1000); // 模拟网络延迟
+    }, 1000);
   });
 };
 
-export const register = (userData) => api.post('/auth/register', userData);
+export const register = async (userData) => {
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/register', JSON.stringify(userData), {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response;
+  } catch (error) {
+    throw new Error('BAD REQUEST');
+  }
+}
 
 export const getPosts = (params) => api.get('/posts', { params });
 

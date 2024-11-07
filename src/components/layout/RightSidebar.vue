@@ -35,6 +35,10 @@ const activeUsers = ref([
   padding: 15px;
 }
 
+.monthly-active h3{
+  color: var(--primary-color);
+}
+
 .user-list {
   list-style-type: none;
   padding: 0;

@@ -1,52 +1,172 @@
 <script setup>
-import { h } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useStore } from 'vuex'
+import { useRouter, useRoute } from 'vue-router'
 
-// 定义 SVG 图标组件
-const Icon = ({ path }) => h('svg', { 
-  xmlns: 'http://www.w3.org/2000/svg', 
-  viewBox: '0 0 24 24', 
-  fill: 'currentColor', 
-  width: '1em', 
-  height: '1em' 
-}, [h('path', { d: path })]);
+const store = useStore()
+const router = useRouter()
+const route = useRoute()
 
-// 定义各个图标的路径
-const icons = {
-  comments: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z',
-  book: 'M12 21V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-7h-10v9zm0-11h8V7h-8v3z',
-  users: 'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z',
-  bell: 'M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z'
-};
+const isLoggedIn = computed(() => store.state.user.isLoggedIn)
+
+// 当前选中的板块
+const currentSection = ref('all')
+
+// 所有板块的配置
+const sections = [
+  // 筛选类板块（使用默认颜色）
+  {
+    id: 'all',
+    name: '全部主题',
+    icon: 'mdi mdi-format-list-bulleted',
+    isFilter: true
+  },
+  {
+    id: 'history',
+    name: '历史话题',
+    icon: 'mdi mdi-history',
+    isFilter: true
+  },
+  {
+    id: 'following',
+    name: '我的关注',
+    icon: 'mdi mdi-star-outline',
+    isFilter: true,
+    requireLogin: true
+  },
+  // 特色板块（使用自定义颜色）
+  {
+    id: 'announcement',
+    name: '公告',
+    icon: 'mdi mdi-bullhorn-outline',
+    color: '#FF4D4F',
+  },
+  {
+    id: 'featured',
+    name: '精华',
+    icon: 'mdi mdi-crown-outline',
+    color: '#722ED1',
+  },
+  {
+    id: 'study',
+    name: '学习',
+    icon: 'mdi mdi-school-outline',
+    color: '#FADB14',
+  },
+  {
+    id: 'life',
+    name: '生活',
+    icon: 'mdi mdi-coffee-outline',
+    color: '#52C41A',
+  },
+  {
+    id: 'lost',
+    name: '拾遗',
+    icon: 'mdi mdi-package-variant',
+    color: '#13C2C2',
+  },
+  {
+    id: 'confession',
+    name: '表白墙',
+    icon: 'mdi mdi-heart-outline',
+    color: '#FF85C0',
+  }
+]
+
+// 处理板块点击
+const handleSectionClick = (sectionId) => {
+  const section = sections.find(s => s.id === sectionId)
+  if (section?.requireLogin && !isLoggedIn.value) {
+    alert('请先登录')
+    return
+  }
+
+  currentSection.value = sectionId
+  
+  router.push({ 
+    query: { section: sectionId }
+  })
+  
+  if (section?.isFilter) {
+    // 筛选类板块使用默认主题色
+    store.commit('theme/setThemeColor', '#1890FF')
+    store.commit('theme/setWelcomeMessage', '欢迎来到论坛')
+  } else if (section) {
+    // 特色板块使用自定义颜色
+    store.commit('theme/setThemeColor', section.color)
+    store.commit('theme/setWelcomeMessage', `欢迎来到${section.name}板块`)
+  }
+}
+
+const handleClick = () => {
+  if (!isLoggedIn.value) {
+    alert('请先登录后再发布主题。')
+  }
+}
+
+// 组件挂载时初始化状态
+onMounted(() => {
+  handleSectionClick('all')
+})
 </script>
 
 <template>
   <aside class="sidebar">
-    <button class="new-topic-btn">发布主题</button>
+    <!-- 发布主题按钮 -->
+    <router-link v-if="isLoggedIn" to="/create-post" class="new-topic-btn">
+      发布主题
+    </router-link>
+    <button v-else class="new-topic-btn" @click="handleClick">
+      发布主题
+    </button>
+
+    <!-- 筛选导航 -->
+    <nav class="sidebar-nav">
+      <h3>筛选</h3>
+      <ul>
+        <li 
+          v-for="section in sections.filter(s => s.isFilter)"
+          :key="section.id"
+          @click="handleSectionClick(section.id)"
+        >
+          <a 
+            href="#" 
+            :class="['section-link', { 
+              'active': currentSection === section.id
+            }]"
+            :style="currentSection === section.id ? 
+              { '--active-color': '#1890FF' } : {}"
+          >
+            <div class="section-icon">
+              <i :class="section.icon" :style="{ color: '#666' }"></i>
+            </div>
+            <span>{{ section.name }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- 板块导航 -->
     <nav class="sidebar-nav">
       <h3>板块</h3>
       <ul>
-        <li>
-          <a href="#">
-            <Icon :path="icons.comments" />
-            <span>综合讨论</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            <Icon :path="icons.book" />
-            <span>学习交流</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            <Icon :path="icons.users" />
-            <span>校园生活</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            <Icon :path="icons.bell" />
-            <span>活动公告</span>
+        <li 
+          v-for="section in sections.filter(s => !s.isFilter)"
+          :key="section.id"
+          @click="handleSectionClick(section.id)"
+        >
+          <a 
+            href="#" 
+            :class="['section-link', { 
+              'active': currentSection === section.id
+            }]"
+            :style="currentSection === section.id ? 
+              { '--active-color': section.color } : {}"
+          >
+            <div class="section-icon">
+              <i :class="section.icon" :style="{ color: section.color }"></i>
+            </div>
+            <span>{{ section.name }}</span>
           </a>
         </li>
       </ul>
@@ -57,7 +177,7 @@ const icons = {
 <style scoped>
 .sidebar {
   width: 200px;
-  padding: 0 20px; /* 移除顶部内边距 */
+  padding: 0 20px;
   background-color: #fff;
   flex-shrink: 0;
 }
@@ -73,15 +193,11 @@ const icons = {
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
-  margin: 20px 0; /* 改为上下margin */
+  margin: 20px 0;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s;
-}
-
-.new-topic-btn:hover {
-  background-color: #1a7ee6;
 }
 
 .sidebar-nav h3 {
@@ -99,30 +215,47 @@ const icons = {
   margin-bottom: 10px;
 }
 
-.sidebar-nav a {
+.section-link {
   color: var(--text-color);
   text-decoration: none;
   display: flex;
   align-items: center;
-  padding: 5px 0;
-  transition: color 0.2s;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s;
 }
 
-.sidebar-nav a:hover {
-  color: var(--primary-color);
+.section-link:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
-.sidebar-nav a svg {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
+.section-link.active {
+  color: var(--active-color);
+  background-color: rgba(var(--active-color-rgb), 0.1);
 }
 
-@media (max-width: 1024px) {
-  .sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
-  }
+.section-link.active i {
+  color: var(--active-color) !important;
+}
+
+.section-icon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-icon i {
+  font-size: 1.4em;
+  transition: color 0.3s;
+}
+
+/* 为了视觉分隔，给第二个导航添加上边距 */
+.sidebar-nav + .sidebar-nav {
+  margin-top: 24px;
 }
 </style>

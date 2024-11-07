@@ -130,12 +130,22 @@ const formatTime = (date) => {
 }
 
 
+/* .sort-options, .filter-options:hover {
+  border-color: black; 
+} */
+  
 .post-item {
   display: flex;
   align-items: center;
-  padding: 15px 0;
+  padding: 15px 5px;
+  transition: background-color 0.2s, transform 0.2s;
   /* 移除了 border-bottom */
 }
+
+.post-item:hover {
+    background-color: #f9f9f9;
+    transform: scale(1.02);
+  }
 
 .post-avatar img {
   width: 40px;
@@ -211,6 +221,12 @@ const formatTime = (date) => {
   font-size: 0.9rem;
   color: var(--text-color);
   cursor: pointer;
+}
+
+.sort-options select:hover,
+.filter-options select:hover {
+  background-color: var(--hover-color); /* 定义悬浮时的背景色 */
+  border-color: var(--primary-color); /* 定义悬浮时的边框色 */
 }
 
 .sort-options select:focus,

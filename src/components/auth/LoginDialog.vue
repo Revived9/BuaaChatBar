@@ -67,14 +67,18 @@ const handleLogin = async () => {
   try {
     loginError.value = ''
     const response = await login(form)
-    const { token, user } = response.data
-    localStorage.setItem('token', token)
-    await store.dispatch('setUser', {
-      isLoggedIn: true,
-      username: 'Nameless9', // 使用假定的昵称
-      avatar: '/src/assets/profile.png', // 使用假定的头像路径
-      studentId: form.studentId // 添加学号
+    const { data } = response
+    
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('userInfo', JSON.stringify(data.user))
+    
+    await store.dispatch('user/setLoginStatus', true)
+    await store.dispatch('user/setCurrentUser', {
+      username: data.user.username,
+      avatar: data.user.avatar,
+      studentId: form.studentId
     })
+    
     showSuccessDialog.value = true
   } catch (error) {
     console.error('登录失败:', error)
@@ -102,7 +106,7 @@ const handleForgotPassword = () => {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
+  display: flex; 
   justify-content: center;
   align-items: center;
   z-index: 1000;

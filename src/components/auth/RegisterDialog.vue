@@ -4,7 +4,7 @@
       <h2>注册</h2>
       <form @submit.prevent="handleRegister">
         <div class="form-group">
-          <input id="studentId" v-model="form.studentId" type="text" placeholder="学号" required>
+          <input id="studentId" v-model="form.student_id" type="text" placeholder="学号" required>
         </div>
         <div class="form-group">
           <input id="username" v-model="form.username" type="text" placeholder="用户名" required>
@@ -48,7 +48,7 @@ const router = useRouter()
 const emit = defineEmits(['close'])
 
 const form = reactive({
-  studentId: '',
+  student_id: '',
   username: '',
   email: '',
   password: '',
@@ -67,25 +67,44 @@ const showTerms = () => {
   // 例如，可以打开一个新的对话框或导航到一个包含守则的页面
 }
 
-const handleRegister = async () => {
-  if (!form.agreeTerms) {
-    console.error('请同意航吧守则')
-    return
-  }
-  
+async function handleRegister() {
   try {
-    const response = await register(form)
-    // 假设后端返回的数据中包含 token
-    const { token } = response.data
-    localStorage.setItem('token', token)
-    await store.dispatch('user/setUser', response.data.user)
-    router.push('/')
-    emit('close')
+    const result = await register(form);
+    const data = result.data
+    if (data.code === 1) {
+      // 注册成功，执行成功后的操作，如跳转到登录页面
+      alert('注册成功');
+      window.location.href = '/';  // 假设跳转到登录页面
+    } else {
+      // 根据后端返回的 message 提示用户注册失败的原因
+      alert(data.message || '注册失败，请重试');
+    }
   } catch (error) {
-    console.error('注册失败:', error)
-    // 显示错误消息
+    console.error(error);
+    alert(error.message);  // 显示捕获到的错误信息
   }
 }
+
+
+// const handleRegister = async () => {
+//   if (!form.agreeTerms) {
+//     console.error('请同意航吧守则')
+//     return
+//   }
+  
+//   try {
+//     const response = await register(form)
+//     // 假设后端返回的数据中包含 token
+//     const { token } = response.data
+//     localStorage.setItem('token', token)
+//     await store.dispatch('user/setUser', response.data.user)
+//     router.push('/')
+//     emit('close')
+//   } catch (error) {
+//     console.error('注册失败:', error)
+//     // 显示错误消息
+//   }
+// }
 </script>
 
 <style scoped>

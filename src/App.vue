@@ -1,26 +1,33 @@
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 import Header from '@/components/layout/Header.vue'
 import WelcomeBanner from '@/components/common/WelcomeBanner.vue'
 import MainContent from '@/components/layout/MainContent.vue'
+import UserProfile from '@/views/UserProfile.vue'
+import CreatePost from '@/views/CreatePost.vue'
 
-const route = useRoute()
 const store = useStore()
+const route = useRoute()
 
+// 计算当前页面类型
 const isUserProfilePage = computed(() => route.name === 'UserProfile')
-const isLoggedIn = computed(() => store.state.user.isLoggedIn)
+const isCreatePostPage = computed(() => route.name === 'CreatePost')
+
+onMounted(async () => {
+  await store.dispatch('user/initUserState')
+})
 </script>
 
 <template>
   <div id="app">
     <Header />
-    <template v-if="!isUserProfilePage">
+    <template v-if="!isUserProfilePage && !isCreatePostPage">
       <WelcomeBanner />
       <MainContent />
     </template>
-    <router-view v-else></router-view>
+    <router-view v-else />
   </div>
 </template>
 

@@ -1,6 +1,15 @@
 <script setup>
 import Sidebar from '@/components/layout/Sidebar.vue'
 import RightSidebar from '@/components/layout/RightSidebar.vue'
+import Home from '@/views/Home.vue'
+import Tags from '@/views/Tags.vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
+
+const route = useRoute()
+const store = useStore()
+const isHomePage = computed(() => route.name === 'Home')
 </script>
 
 <template>
@@ -8,7 +17,12 @@ import RightSidebar from '@/components/layout/RightSidebar.vue'
     <div class="main-content-inner">
       <Sidebar />
       <div class="center-content">
-        <router-view></router-view>
+        <template v-if="isHomePage">
+          <Home />
+        </template>
+        <router-view v-else>
+          <Tags />
+        </router-view>
       </div>
       <RightSidebar />
     </div>
