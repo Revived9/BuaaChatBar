@@ -19,7 +19,12 @@
       </div>
     </div>
     <div class="post-list">
-      <div v-for="post in filteredPosts" :key="post.id" class="post-item">
+      <div 
+        v-for="post in filteredPosts" 
+        :key="post.id" 
+        class="post-item"
+        @click="navigateToPost(post.id)"
+      >
         <div class="post-avatar">
           <img :src="post.author.avatar" :alt="post.author.name">
         </div>
@@ -42,9 +47,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
-import RightSidebar from '@/components/layout/RightSidebar.vue'
+import { useRouter } from 'vue-router'
 
 const store = useStore()
+const router = useRouter()
 const currentSort = ref('latest')
 const currentFilter = ref('all')
 
@@ -89,6 +95,10 @@ const filteredPosts = computed(() => {
 const formatTime = (date) => {
   // 这里可以使用一个日期格式化库，如 date-fns
   return date.toLocaleString()
+}
+
+const navigateToPost = (postId) => {
+  router.push(`/posts/${postId}`)
 }
 </script>
 
@@ -140,6 +150,7 @@ const formatTime = (date) => {
   padding: 15px 5px;
   transition: background-color 0.2s, transform 0.2s;
   /* 移除了 border-bottom */
+  cursor: pointer;
 }
 
 .post-item:hover {

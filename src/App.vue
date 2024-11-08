@@ -3,17 +3,16 @@ import { onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import Header from '@/components/layout/Header.vue'
-import WelcomeBanner from '@/components/common/WelcomeBanner.vue'
+import WelcomeBanner from '@/components/layout/WelcomeBanner.vue'
 import MainContent from '@/components/layout/MainContent.vue'
 import UserProfile from '@/views/UserProfile.vue'
-import CreatePost from '@/views/CreatePost.vue'
 
 const store = useStore()
 const route = useRoute()
 
 // 计算当前页面类型
 const isUserProfilePage = computed(() => route.name === 'UserProfile')
-const isCreatePostPage = computed(() => route.name === 'CreatePost')
+const isPostViewPage = computed(() => route.name === 'PostView')
 
 onMounted(async () => {
   await store.dispatch('user/initUserState')
@@ -23,7 +22,7 @@ onMounted(async () => {
 <template>
   <div id="app">
     <Header />
-    <template v-if="!isUserProfilePage && !isCreatePostPage">
+    <template v-if="!isUserProfilePage && !isPostViewPage">
       <WelcomeBanner />
       <MainContent />
     </template>

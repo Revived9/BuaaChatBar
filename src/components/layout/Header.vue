@@ -15,7 +15,6 @@
           <input type="text" placeholder="搜索" class="search-input" v-model="searchQuery" />
           <i class="iconfont icon-search" @click="performSearch"></i>
         </div>
-        <!-- <template v-if="false"> -->
         <template v-if="!isLoggedIn">
           <button @click="showLoginDialog" class="btn btn-login">登录</button>
           <button @click="showRegisterDialog" class="btn btn-register">注册</button>
@@ -35,9 +34,8 @@
   </header>
   <LoginDialog v-if="isLoginDialogVisible" @close="closeLoginDialog" />
   <RegisterDialog v-if="isRegisterDialogVisible" @close="closeRegisterDialog" />
+  <CreatePostDialog v-if="isCreatePostDialogVisible" @close="closeCreatePostDialog" />
 </template>
-
- 
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
@@ -45,6 +43,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import LoginDialog from '@/components/auth/LoginDialog.vue'
 import RegisterDialog from '@/components/auth/RegisterDialog.vue'
+import CreatePostDialog from '@/components/dialogs/CreatePostDialog.vue'
 
 const store = useStore()
 const router = useRouter()
@@ -60,6 +59,7 @@ const isDropdownOpen = ref(false)
 const dropdownRef = ref(null)
 const isActive = ref('all')
 const searchQuery = ref('')
+const isCreatePostDialogVisible = ref(false)
 
 const showLoginDialog = () => {
   isLoginDialogVisible.value = true
@@ -75,6 +75,14 @@ const closeLoginDialog = () => {
 
 const closeRegisterDialog = () => {
   isRegisterDialogVisible.value = false
+}
+
+const showCreatePostDialog = () => {
+  isCreatePostDialogVisible.value = true
+}
+
+const closeCreatePostDialog = () => {
+  isCreatePostDialogVisible.value = false
 }
 
 async function sendDataToBackend() {

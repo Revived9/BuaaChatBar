@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
+import CreatePostDialog from '@/components/dialogs/CreatePostDialog.vue'
 
 const store = useStore()
 const router = useRouter()
@@ -108,14 +109,24 @@ const handleClick = () => {
 onMounted(() => {
   handleSectionClick('all')
 })
+
+const isCreatePostDialogVisible = ref(false)
+
+const showCreatePostDialog = () => {
+  isCreatePostDialogVisible.value = true
+}
+
+const closeCreatePostDialog = () => {
+  isCreatePostDialogVisible.value = false
+}
 </script>
 
 <template>
   <aside class="sidebar">
     <!-- 发布主题按钮 -->
-    <router-link v-if="isLoggedIn" to="/create-post" class="new-topic-btn">
+    <button v-if="isLoggedIn" class="new-topic-btn" @click="showCreatePostDialog">
       发布主题
-    </router-link>
+    </button>
     <button v-else class="new-topic-btn" @click="handleClick">
       发布主题
     </button>
@@ -172,6 +183,8 @@ onMounted(() => {
       </ul>
     </nav>
   </aside>
+
+  <CreatePostDialog v-if="isCreatePostDialogVisible" @close="closeCreatePostDialog" />
 </template>
 
 <style scoped>
