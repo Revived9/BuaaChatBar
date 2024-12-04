@@ -166,11 +166,25 @@ export const biomodify = async (bio) => {
 }
 
 //发布帖子
+// export const createpost = async (post) => {
+//   try {
+//     const response = await axios.post('http://127.0.0.1:8000/CreatePost', post, {
+//       headers: {
+//         'Content-Type': 'multipart/form-data'
+//       }
+//     });
+//     return response;
+//   } catch (error) {
+//     throw new Error('BAD createpost');
+//   }
+// }
+
+// 发布帖子
 export const createpost = async (post) => {
   try {
-    const response = await axios.post('http://127.0.0.1:8000/CreatePost', post, {
+    const response = await axios.post('http://127.0.0.1:8000/CreatePost', JSON.stringify(post), {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'application/json'  // 这里改成 JSON 格式
       }
     });
     return response;
@@ -178,6 +192,7 @@ export const createpost = async (post) => {
     throw new Error('BAD createpost');
   }
 }
+
 
 //删除帖子
 export const deletepost = async (post) => {

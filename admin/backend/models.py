@@ -30,6 +30,7 @@ class Post(models.Model):
     post_id = models.BigIntegerField(primary_key=True)
     post_title = models.CharField(max_length=100)
     post_content = models.TextField()
+    post_label = models.CharField(max_length=30)
     post_tag_id = models.ForeignKey(Label, on_delete=models.CASCADE)
     post_heat = models.IntegerField()
     post_time = models.DateField()
@@ -71,7 +72,6 @@ class Picture(models.Model):
     PC_category = models.IntegerField()
     PC_author_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
-
 class Inform(models.Model):
     objects = models.Manager()
     IF_id = models.BigIntegerField(primary_key=True)
@@ -95,3 +95,9 @@ class PostAndLabels(models.Model):
     PL_id = models.BigIntegerField(primary_key=True)
     PL_tag_id = models.ForeignKey(Label, on_delete=models.CASCADE)
     PL_post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+class PostPicture(models.Model):
+    objects = models.Manager()
+    PP_id = models.BigIntegerField(primary_key=True)
+    PP_path = models.CharField(max_length=300)
+    PP_post_id = models.ForeignKey(Post, on_delete=models.CASCADE)

@@ -4,40 +4,27 @@
       <div class="filter-container">
         <div class="sort-options">
           <select v-model="currentSort" @change="handleSortChange">
-            <option value="latest">最新回复</option>
             <option value="hot">热门</option>
             <option value="new">最新发布</option>
-          </select>
-        </div>
-        <div class="filter-options">
-          <select v-model="currentFilter" @change="handleFilterChange">
-            <option value="all">全部问题</option>
-            <option value="unsolved">待解决问题</option>
-            <option value="solved">已解决问题</option>
           </select>
         </div>
       </div>
     </div>
     <div class="post-list">
-      <div 
-        v-for="post in filteredPosts" 
-        :key="post.id" 
-        class="post-item"
-        @click="navigateToPost(post.id)"
-      >
+      <div v-for="post in posts" :key="post.id" class="post-item" @click="navigateToPost(post.id)">
         <div class="post-avatar">
-          <img :src="post.author.avatar" :alt="post.author.name">
+          <img :src="post.avatar" :alt="post.username">
         </div>
         <div class="post-content">
-          <h3 class="post-title">{{ post.title }}</h3>
+          <h3 class="post-title">{{ post.post_title }}</h3>
           <div class="post-meta">
-            <span class="author">{{ post.author.name }}</span>
-            <span class="time">{{ formatTime(post.lastReplyTime) }}</span>
-            <span class="category">{{ post.category }}</span>
+            <span class="author">{{ post.username }}</span>
+            <span class="time">{{ formatTime(post.post_time) }}</span>
+<!--            <span class="category">{{ post.post_heat }}</span>-->
           </div>
         </div>
         <div class="post-stats">
-          <span class="reply-count">{{ post.replyCount }} 回复</span>
+          <span class="reply-count">{{ post.post_heat }} 热度</span>
         </div>
       </div>
     </div>
@@ -45,68 +32,74 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { getallpost } from '@/services/api';
+import { getallpost } from '@/services/api'
 
 const store = useStore()
 const router = useRouter()
-const currentSort = ref('latest')
-const currentFilter = ref('all')
 
-const posts = ref([
+const currentSort = ref('hot')
+const currentFilter = ref('all')
+const currentSection = computed(() => store.state.section.currentSection)
+
+const init_posts = ref([
   {
     id: 1,
-    title: "Vue 3 组件通信最佳实践",
-    author: { name: "张三", avatar: "/avatars/zhangsan.jpg" },
-    lastReplyTime: new Date("2023-05-10T10:30:00"),
-    category: "前端开发",
-    replyCount: 15,
+    post_title: "Vue 3 组件通信最佳实践",
+    username: "张三",
+    avatar: "/avatars/zhangsan.jpg",
+    post_time: new Date("2023-05-10T10:30:00"),
+    //category: "前端开发",
+    post_heat: 15,
     solved: true
   },
   {
     id: 2,
-    title: "如何优化 Webpack 构建速度？",
-    author: { name: "李四", avatar: "/avatars/lisi.jpg" },
-    lastReplyTime: new Date("2023-05-09T16:45:00"),
-    category: "工程化",
-    replyCount: 8,
+    post_title: "如何优化 Webpack 构建速度？",
+    username: "李四",
+    avatar: "/avatars/lisi.jpg",
+    post_time: new Date("2023-05-09T16:45:00"),
+    //category: "工程化",
+    post_heat: 8,
     solved: false
   },
-  // 添加更多帖子...
 ])
 
-const handleSortChange = () => {
-  // 这里应该调用 API 来获取排序后的帖子
-  console.log('Sort changed to:', currentSort.value)
+const posts = ref([])
+
+// 监视 currentSort 和 currentFilter 的变化，实时获取更新的帖子
+const filteredPosts = async () => {
+  const sortfilter = {
+    sort: currentSort.value,
+    filter: currentFilter.value,
+    section: currentSection.value
+  }
+  try {
+    console.log(currentSection.value)
+    const response = await getallpost(sortfilter)
+    posts.value = response.data.data // 更新 posts
+    console.log(response.data.data)
+  } catch (error) {
+    console.error('Error fetching posts:', error)
+  }
 }
 
-const handleFilterChange = () => {
-  // 这里应该调用 API 来获取筛选后的帖子
-  console.log('Filter changed to:', currentFilter.value)
-}
-
-/*
-const filteredPosts = computed(() => {
-  // 这里应该根据 currentSort 和 currentFilter 来过滤和排序帖子
-  // 现在只是简单地返回所有帖子
-  return posts.value
+// 监视排序和筛选条件的变化，获取新的数据
+watch([currentSort, currentFilter, currentSection], async () => {
+  console.log('change')
+  await filteredPosts()
 })
-  */
 
-const filteredPosts = computed(() => {
-  const sortfilter = ref({
-    sort: currentSort,
-    filter: currentFilter,
-  })
-  const response = getallpost(sortfilter)
-  const data = response.data
-  return data
+// 初始化时获取数据（这里会使用 init_posts 作为初始数据，避免立即请求）
+onMounted(async () => {
+  // 只初始化一次，之后会根据排序和筛选条件从 API 获取数据
+  posts.value = [...init_posts.value]
+  await filteredPosts() // 如果需要从 API 拉取数据，则调用
 })
 
 const formatTime = (date) => {
-  // 这里可以使用一个日期格式化库，如 date-fns
   return date.toLocaleString()
 }
 
@@ -114,6 +107,7 @@ const navigateToPost = (postId) => {
   router.push(`/posts/${postId}`)
 }
 </script>
+
 
 <style scoped>
 .home {
@@ -132,13 +126,15 @@ const navigateToPost = (postId) => {
   flex-grow: 1;
 }
 
-.sort-options, .filter-options {
+.sort-options,
+.filter-options {
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
 }
 
-.sort-options button, .filter-options button {
+.sort-options button,
+.filter-options button {
   background: none;
   border: none;
   cursor: pointer;
@@ -147,7 +143,8 @@ const navigateToPost = (postId) => {
   transition: background-color 0.2s;
 }
 
-.sort-options button.active, .filter-options button.active {
+.sort-options button.active,
+.filter-options button.active {
   background-color: var(--primary-color);
   color: white;
 }
@@ -156,7 +153,7 @@ const navigateToPost = (postId) => {
 /* .sort-options, .filter-options:hover {
   border-color: black; 
 } */
-  
+
 .post-item {
   display: flex;
   align-items: center;
@@ -167,9 +164,9 @@ const navigateToPost = (postId) => {
 }
 
 .post-item:hover {
-    background-color: #f9f9f9;
-    transform: scale(1.02);
-  }
+  background-color: #f9f9f9;
+  transform: scale(1.02);
+}
 
 .post-avatar img {
   width: 40px;
@@ -192,7 +189,7 @@ const navigateToPost = (postId) => {
   color: #666;
 }
 
-.post-meta > * {
+.post-meta>* {
   margin-right: 10px;
 }
 
@@ -249,8 +246,10 @@ const navigateToPost = (postId) => {
 
 .sort-options select:hover,
 .filter-options select:hover {
-  background-color: var(--hover-color); /* 定义悬浮时的背景色 */
-  border-color: var(--primary-color); /* 定义悬浮时的边框色 */
+  background-color: var(--hover-color);
+  /* 定义悬浮时的背景色 */
+  border-color: var(--primary-color);
+  /* 定义悬浮时的边框色 */
 }
 
 .sort-options select:focus,

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useStore } from 'vuex'
+import { createpost } from '@/services/api'
 
 const store = useStore()
 const emit = defineEmits(['close'])
@@ -10,7 +11,8 @@ const post = ref({
   content: '',
   section: '',  // 当前选中的板块
   tags: [],
-  images: []
+  images: [],
+  user_id: store.state.user.studentId
 })
 
 const tagInput = ref('')
@@ -70,7 +72,8 @@ const handleFileUpload = (event) => {
   const files = Array.from(event.target.files)
   files.forEach(file => {
     const url = URL.createObjectURL(file)
-    post.value.images.push({ file, url })
+    //post.value.images.push({ file, url })
+    post.value.images.push(url)
   })
 }
 
@@ -95,13 +98,35 @@ const removeTag = (tag) => {
 // 提交帖子
 const submitPost = async () => {
   try {
-    // 这里添加发布帖子的逻辑
-    console.log('发布帖子:', post.value)
-    emit('close')
+    /*
+    // 创建 FormData 实例
+    const formData = new FormData();
+
+    // 将其他字段添加到 FormData 中
+    formData.append('title', post.value.title);
+    formData.append('content', post.value.content);
+    formData.append('section', post.value.section);
+    formData.append('tags', JSON.stringify(post.value.tags)); // 如果 tags 是数组，可能需要转成字符串
+    formData.append('user_id', post.value.user_id);
+    formData.append('images', JSON.stringify(post.value.images));
+    */
+
+    // 调用 createpost 函数进行帖子发布
+    const response = await createpost(post.value);
+    const data = response.data;
+    if (data.code === 1) {
+      // 在请求成功后处理响应
+      alert('发布成功');
+    } else {
+      // 处理发布失败的情况
+      alert('发布失败: ' + data.message);
+    }
   } catch (error) {
-    console.error('发布失败:', error)
+    console.error(error);
+    alert(error.message);  // 显示捕获到的错误信息
   }
 }
+
 
 // 添加获取板块样式的方法
 const getSectionStyle = (section) => {
@@ -126,31 +151,18 @@ const getSectionStyle = (section) => {
       <div class="dialog-body">
         <div class="form-group">
           <label for="title">标题</label>
-          <input 
-            type="text" 
-            id="title" 
-            v-model="post.title" 
-            placeholder="请输入标题"
-            required
-          />
+          <input type="text" id="title" v-model="post.title" placeholder="请输入标题" required />
         </div>
 
         <div class="form-group">
           <label>选择板块</label>
           <div class="section-selector">
-            <button
-              v-for="section in sections"
-              :key="section.id"
-              class="section-btn"
-              :class="{ active: post.section === section.id }"
-              :style="getSectionStyle(section)"
-              @click="selectSection(section)"
-            >
+            <button v-for="section in sections" :key="section.id" class="section-btn"
+              :class="{ active: post.section === section.id }" :style="getSectionStyle(section)"
+              @click="selectSection(section)">
               <div class="section-icon" :style="{ background: post.section === section.id ? 'white' : section.color }">
-                <i 
-                  :class="post.section === section.id ? section.iconActive : section.icon"
-                  :style="{ color: post.section === section.id ? section.color : 'white' }"
-                ></i>
+                <i :class="post.section === section.id ? section.iconActive : section.icon"
+                  :style="{ color: post.section === section.id ? section.color : 'white' }"></i>
               </div>
               <span class="section-name">{{ section.name }}</span>
             </button>
@@ -159,54 +171,32 @@ const getSectionStyle = (section) => {
 
         <div class="form-group">
           <label for="content">内容</label>
-          <textarea 
-            id="content" 
-            v-model="post.content" 
-            placeholder="请输入内容"
-            required
-          ></textarea>
+          <textarea id="content" v-model="post.content" placeholder="请输入内容" required></textarea>
         </div>
 
-        <div class="form-group">
+
+        <!-- <div class="form-group">
           <label>标签</label>
           <div class="tag-input">
-            <input 
-              type="text" 
-              v-model="tagInput"
-              @keyup.enter="addTag"
-              placeholder="输入标签后按回车添加"
-            />
+            <input type="text" v-model="tagInput" @keyup.enter="addTag" placeholder="输入标签后按回车添加" />
           </div>
           <div class="tags-container">
-            <span 
-              v-for="tag in post.tags" 
-              :key="tag" 
-              class="tag"
-            >
+            <span v-for="tag in post.tags" :key="tag" class="tag">
               {{ tag }}
               <button @click="removeTag(tag)" class="remove-tag">&times;</button>
             </span>
           </div>
-        </div>
+        </div> -->
 
         <div class="form-group">
           <label>图片</label>
           <label class="file-upload-btn">
             <i class="mdi mdi-image-plus"></i>
             <span>选择图片</span>
-            <input 
-              type="file" 
-              @change="handleFileUpload" 
-              accept="image/*" 
-              multiple
-            />
+            <input type="file" @change="handleFileUpload" accept="image/*" multiple />
           </label>
           <div class="image-preview">
-            <div 
-              v-for="(image, index) in post.images" 
-              :key="index" 
-              class="preview-item"
-            >
+            <div v-for="(image, index) in post.images" :key="index" class="preview-item">
               <img :src="image.url" alt="预览图片" />
               <button @click="removeImage(index)" class="remove-image">&times;</button>
             </div>

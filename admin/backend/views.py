@@ -15,6 +15,7 @@ from rest_framework.utils import json
 from rest_framework.views import APIView
 from .models import *
 from datetime import datetime
+from django.db.models import F
 # Create your views here.
 
 
@@ -72,39 +73,12 @@ def generate_unique_postandlabel_id():
         PL_id = random.randint(1000000000, 9999999999)  # 生成一个10位的随机数
         if not PostAndLabels.objects.filter(PL_id=PL_id).exists():
             return PL_id
-# class studentRegister(APIView):
-#     def post(self, request):
-#         print("!!!!")
-#         request = JSONParser().parse(request)
-#         # 生成一个随机的、唯一的BigInt作为用户ID
-#         user_id = generate_unique_user_id()
-#         user_name = request.data["name"]
-#         user_password = request.data["password"]
-#         user_email = request.data["email"]
-#         user_student_id = request.data["student_id"]
-#         user_experience = 0
-#         user_sign_date = datetime.now().date()
-#         user_birthday = datetime(2024,1,1)
-#         # 头像上传状态先默认为0
-#         user_uploaded = 0
-#         # 用户状态先默认为0
-#         user_role = 0
-#         user_post_cnt = 0
-#         user_info_cnt = 0
-#         user = User(user_id = user_id, user_name = user_name, user_password = user_password, user_email = user_email, user_student_id = user_student_id, user_experience = user_experience,
-#                     user_sign_date = user_sign_date, user_birthday = user_birthday, user_uploaded = user_uploaded, user_role = user_role,
-#                     user_post_cnt = user_post_cnt, user_info_cnt = user_info_cnt)
-#         if User.objects.filter(user_name = user_name):
-#             code = -1
-#             message = "用户名已经被注册了，请重新注册"
-#             return Response({'code': code, 'message': message}, status=HTTP_400_BAD_REQUEST)
-#         else:
-#             user.save()
-#             code = 1
-#             message = "注册成功"
-#             return Response({'code': code, 'message': message}, status=HTTP_200_OK)
 
-
+def generate_unique_postpicture_id():
+    while True:
+        PP_id = random.randint(1000000000, 9999999999)  # 生成一个10位的随机数
+        if not PostPicture.objects.filter(PP_id=PP_id).exists():
+            return PP_id
 @csrf_exempt
 def studentRegistration(request):
     res = {"code": 1, "message": "", "data": None,"id": -1}
@@ -156,35 +130,6 @@ def studentRegistration(request):
         res["message"] = "请使用POST方法"
     return JsonResponse(res)
 
-# class adminRegister(APIView):
-#     def post(self, request):
-#         user_name = request.data["name"]
-#         user_password = request.data["password"]
-#         user_email = request.data["email"]
-#         user_student_id = request.data["student_id"]
-#         user_experience = 0
-#         user_sign_date = datetime.now().date()
-#         # 刚注册的用户的生日默认为2024.1.1
-#         user_birthday = datetime(2024,1,1)
-#         # 头像上传状态先默认为0
-#         user_uploaded = 0
-#         # 管理员状态先默认为1
-#         user_role = 1
-#         user_post_cnt = 0
-#         user_info_cnt = 0
-#         user = User(user_name = user_name, user_password = user_password, user_email = user_email, user_student_id = user_student_id, user_experience = user_experience,
-#                     user_sign_date = user_sign_date, user_birthday = user_birthday, user_uploaded = user_uploaded, user_role = user_role,
-#                     user_post_cnt = user_post_cnt, user_info_cnt = user_info_cnt)
-#         if User.objects.filter(user_name = user_name):
-#             code = -1
-#             message = "用户名已经被注册了，请重新注册"
-#             return Response({'code': code, 'message': message}, status=HTTP_400_BAD_REQUEST)
-#         else:
-#             user.save()
-#             code = 1
-#             message = "注册成功"
-#             return Response({'code': code, 'message': message}, status=HTTP_200_OK)
-
 
 @csrf_exempt
 def studentLogin(request):
@@ -200,7 +145,7 @@ def studentLogin(request):
                     res["code"] = 1
                     res["message"] = "登陆成功"
                     user = User.objects.get(user_student_id=user_student_id)
-                    picture = Picture.objects.get(PC_author_id = user.user_id)
+                    picture = Picture.objects.get(PC_author_id = user)
                     res["id"] = user.user_id
                     res["username"] = user.user_name
                     res["path"] = picture.PC_path
@@ -218,36 +163,6 @@ def studentLogin(request):
         res["message"] = "请使用POST方法"
     return JsonResponse(res)
 
-# class UserLogin(APIView):
-#     def post(self, request):
-#         request = JSONParser().parse(request)
-#         user_student_id = request.data["student_id"]
-#         user_password = request.data["password"]
-#         if User.objects.filter(user_student_id = user_student_id):
-#             if User.objects.filter(user_student_id = user_student_id, user_password = user_password):
-#                 code = 1
-#                 message = "登陆成功，欢迎"
-#                 return Response({'code': code, 'message': message}, status=HTTP_200_OK)
-#             else:
-#                 code = -2
-#                 message = "登陆失败，密码错误"
-#                 return Response({'code': code, 'message': message}, status=HTTP_400_BAD_REQUEST)
-#         else:
-#             code = -1
-#             message = "登录失败，没有这个用户"
-#             return Response({'code': code, 'message': message}, status=HTTP_400_BAD_REQUEST)
-
-# class CreatePost(APIView):
-#     def post(self, request):
-#         post_id = generate_unique_user_id()
-#         post_title = request.data["title"]
-#         post_content = request.data["content"]
-#         post_category = request.data["category"]
-#         post_heat = 1
-#         post_time = request.data["created_at"]
-#         post_user_id = request.data["user_id"]
-#         post_isTop = False
-
 
 @csrf_exempt
 def createPost(request):
@@ -259,9 +174,12 @@ def createPost(request):
             post_title = data.get("title")
             post_content = data.get("content")
             post_user_id = data.get("user_id")
+            post_images = data.get("images")
+
+            post_label = 'aaa'
             post_isTop = False
             user = User.objects.get(user_student_id=post_user_id)
-            LB_tag_name = data.get("tag_name")
+            LB_tag_name = data.get("section")
             if Label.objects.filter(LB_tag_name=LB_tag_name).exists():
                 label = Label.objects.get(LB_tag_name=LB_tag_name)
             else:
@@ -273,8 +191,16 @@ def createPost(request):
             post_time = datetime.now().date()
 
             post = Post(post_id=post_id, post_title=post_title, post_content=post_content, post_tag_id = label,
-                        post_heat = post_heat, post_time = post_time,post_user_id = user, post_isTop = post_isTop)
+                        post_heat = post_heat, post_time = post_time,post_user_id = user, post_isTop = post_isTop,
+                        post_label = post_label)
             post.save()
+            for image in post_images:
+                PP_id = generate_unique_postpicture_id()
+                PP_path = image
+                PP_post_id = post
+                postpicture = PostPicture(PP_id=PP_id, PP_path=PP_path, PP_post_id=PP_post_id)
+                postpicture.save()
+
             PL_id = generate_unique_postandlabel_id()
             PL_tag_id = label
             PL_post_id = post
@@ -352,43 +278,6 @@ def deletePost(request):
         res["message"] = "请使用POST方法"
     return JsonResponse(res)
 
-
-# @csrf_exempt
-# def modifyPersonalInfo(request):
-#     res = {"code": 1, "message": "", "data": None,"sign_date": datetime.now().date(),"post_cnt": -1}
-#     if request.method == 'POST':
-#         try:
-#             data = JSONParser().parse(request)
-#             user_id = data.get("user_id")
-#             username = data.get("username")
-#             email = data.get("email")
-#             birthday = data.get("birthday")
-#             uploaded = data.get("uploaded")
-#             PC_path = data.get("path")
-#             user = User.objects.get(user_id = user_id)
-#             PC_id = generate_unique_picture_id()
-#             PC_category = 0
-#             picture = Picture(PC_id = PC_id, PC_path = PC_path,PC_author_id = user_id,PC_category = PC_category)
-#             if not User.objects.filter(user_name = username):
-#                 picture.save()
-#                 user.user_name = username
-#                 user.user_email = email
-#                 user.user_birthday = birthday
-#                 user.user_uploaded = uploaded
-#                 res["code"] = 1
-#                 res["message"] = "用户信息修改成功"
-#                 res["sign_date"] = user.user_sign_date
-#                 res["post_cnt"] = user.user_post_cnt
-#             else:
-#                 res["code"] = -1
-#                 res["message"] = "用户信息修改失败，用户名已存在"
-#         except Exception as e:
-#             res["code"] = -1
-#             res["message"] = "用户信息修改失败，用户id不存在"+str(e)
-#     else:
-#         res["code"] = -1
-#         res["message"] = "请使用POST方法"
-#     return JsonResponse(res)
 
 
 @csrf_exempt
@@ -518,8 +407,6 @@ def modifyUserName(request):
             data = JSONParser().parse(request)
             user_id = data.get("user_id")
             newUsername = data.get("newUsername")
-            print(user_id)
-            print(newUsername)
             user = User.objects.get(user_student_id = user_id)
             user.user_name = newUsername
             user.save()
@@ -577,3 +464,65 @@ def modifyPicture(request):
         res["code"] = -1
         res["message"] = "请使用POST方法"
     return JsonResponse(res)
+
+
+@csrf_exempt
+def getPostBriefInfo(request):
+    res = {"code": 1, "message": "", "data": None}
+    if request.method == 'POST':
+        try:
+            data = JSONParser().parse(request)
+            part = data.get("section")
+            sort = data.get("sort")
+            if part == "all":
+                if sort == "new":
+                    posts = Post.objects.order_by("-post_time").values('post_id', 'post_title', 'post_heat',
+                                                                       'post_time', 'post_user_id')
+                    post_list = list(posts)
+                    for post in post_list:
+                        post_user_id = post['post_user_id']
+                        post['username'] = User.objects.get(user_id=post_user_id).user_name
+                        post['avatar'] = Picture.objects.get(PC_author_id=post_user_id).PC_path
+                    res["data"] = post_list
+                else:
+                    posts = Post.objects.order_by("-post_heat").values('post_id', 'post_title', 'post_heat',
+                                                                       'post_time', 'post_user_id')
+                    post_list = list(posts)
+                    for post in post_list:
+                        post_user_id = post['post_user_id']
+                        post['username'] = User.objects.get(user_id=post_user_id).user_name
+                        post['avatar'] = Picture.objects.get(PC_author_id=post_user_id).PC_path
+                    res["data"] = post_list
+            else:
+                if sort == "new":
+                    posts = Post.objects.order_by("-post_time").values('post_id', 'post_title', 'post_heat',
+                                                                       'post_time', 'post_user_id', 'post_tag_id')
+                    post_list = []
+                    for post in posts:
+                        post_user_id = post['post_user_id']
+                        post['username'] = User.objects.get(user_id=post_user_id).user_name
+                        post['avatar'] = Picture.objects.get(PC_author_id=post_user_id).PC_path
+                        LB_id = post['post_tag_id']
+                        if Label.objects.get(LB_id=LB_id).LB_tag_name == part:
+                            post_list.append(post)
+                    res["data"] = post_list
+                else:
+                    posts = Post.objects.order_by("-post_heat").values('post_id', 'post_title', 'post_heat',
+                                                                       'post_time', 'post_user_id', 'post_tag_id')
+                    post_list = []
+                    for post in posts:
+                        post_user_id = post['post_user_id']
+                        post['username'] = User.objects.get(user_id=post_user_id).user_name
+                        post['avatar'] = Picture.objects.get(PC_author_id=post_user_id).PC_path
+                        LB_id = post['post_tag_id']
+                        if Label.objects.get(LB_id=LB_id).LB_tag_name == part:
+                            post_list.append(post)
+                    res["data"] = post_list
+        except Exception as e:
+            res["code"] = -1
+            res["message"] = "获取帖子简要信息失败" + str(e)
+    else:
+        res["code"] = -1
+        res["message"] = "请使用POST方法"
+    return JsonResponse(res)
+

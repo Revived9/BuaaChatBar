@@ -13,5 +13,5 @@ urlpatterns = [
     path('UsernameModify', views.modifyUserName),
     path('AvaterModify', views.modifyPicture),
     path('BioModify', views.modifyIntroduction),
-
+    path('GetAllPost', views.getPostBriefInfo),
 ]

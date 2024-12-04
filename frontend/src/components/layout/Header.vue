@@ -4,12 +4,14 @@
       <div class="logo" @click="goToHome">
         <img src="@/assets/logo.png" alt="航吧" class="logo-image">
       </div>
-      <nav>
+
+      <!-- <nav>
         <router-link to="/" class="nav-item" :class="{ active: isActive === 'all' }"
           @click="setActive('all')">全部讨论</router-link>
         <router-link to="/tags" class="nav-item" :class="{ active: isActive === 'tags' }"
           @click="setActive('tags')">标签</router-link>
-      </nav>
+      </nav> -->
+
       <div class="user-actions">
         <div class="search-container">
           <input type="text" placeholder="搜索" class="search-input" v-model="searchQuery" />
@@ -86,26 +88,26 @@ const closeCreatePostDialog = () => {
 }
 
 async function sendDataToBackend() {
-      // 准备要发送的数据，这里简单地创建一个JSON对象
-      const userData = {
-        username: 'john_doe',
-        email: 'john.doe@example.com'
-      };
- 
-      // 使用Fetch API发送POST请求到后端
-      const response = await fetch('http://localhost:5173/', {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData)
-      });
- 
-      // 解析后端返回的JSON响应
-      const responseData = await response.json();
- 
-      // 打印后端返回的数据
-      console.log(responseData);
-    }
+  // 准备要发送的数据，这里简单地创建一个JSON对象
+  const userData = {
+    username: 'john_doe',
+    email: 'john.doe@example.com'
+  };
+
+  // 使用Fetch API发送POST请求到后端
+  const response = await fetch('http://localhost:5173/', {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(userData)
+  });
+
+  // 解析后端返回的JSON响应
+  const responseData = await response.json();
+
+  // 打印后端返回的数据
+  console.log(responseData);
+}
 
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
@@ -214,7 +216,8 @@ nav {
 }
 
 .search-input:hover {
-  border-color: var(--primary-color); /* 定义悬浮时的边框色 */
+  border-color: var(--primary-color);
+  /* 定义悬浮时的边框色 */
 }
 
 .icon-search {
@@ -250,8 +253,10 @@ nav {
 
 .btn-login:hover,
 .btn-register:hover {
-  background-color: blue; /* 自定义悬浮时的颜色 */
-  color: white; /* 鼠标悬浮时文本颜色 */
+  background-color: blue;
+  /* 自定义悬浮时的颜色 */
+  color: white;
+  /* 鼠标悬浮时文本颜色 */
 }
 
 .user-info-dropdown {

@@ -75,12 +75,15 @@ const sections = [
 ]
 
 // 处理板块点击
-const handleSectionClick = (sectionId) => {
+async function handleSectionClick (sectionId) {
   const section = sections.find(s => s.id === sectionId)
   if (section?.requireLogin && !isLoggedIn.value) {
     alert('请先登录')
     return
   }
+
+  // 更新 Vuex 中的 currentSection
+  await store.dispatch('section/updateCurrentSection', sectionId);
 
   currentSection.value = sectionId
   
