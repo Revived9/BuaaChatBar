@@ -1,0 +1,23 @@
+{
+  "name": "buaachatbar",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 8080",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "axios": "^1.7.7",
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5",
+    "vuex": "next"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "rollup": "^4.24.3",
+    "vite": "^6.0.2"
+  }
+}
