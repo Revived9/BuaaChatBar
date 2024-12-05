@@ -63,31 +63,26 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
+// 这里存储了登录的信息，请不要修改，会导致刷新后丢失登录状态
 const handleLogin = async () => {
   try {
     loginError.value = ''
     const response = await login(form)
     const data = response.data
     
-    // localStorage.setItem('token', data.token)
-    // localStorage.setItem('userInfo', JSON.stringify(data.user))
-
     if (data.code === 1) {
-    // if (true) {
-      // 注册成功，执行成功后的操作，如跳转到登 录页面
-
-      localStorage.setItem('date', JSON.stringify(data))
-
+      localStorage.setItem('token', data.token)
+      const userInfo = {
+        username: data.username,
+        avatar: data.path,
+        studentId: form.student_id
+      }
+      localStorage.setItem('userInfo', JSON.stringify(userInfo))
       await store.dispatch('user/setLoginStatus', true)
-      await store.dispatch('user/setCurrentUser', {
-      username: data.username,
-      avatar: data.path,
-      studentId: form.student_id
-      })
+      await store.dispatch('user/setCurrentUser', userInfo)
       showSuccessDialog.value = true
     } else {
-      // 根据后端返回的 message 提示用户注册失败的原因
-      alert(data.message || '注册失败，请重试');
+      alert(data.message || '登录失败，请重试');
     }
   } catch (error) {
     console.error('登录失败:', error)

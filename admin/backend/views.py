@@ -108,7 +108,7 @@ def studentRegistration(request):
                         user_post_cnt=user_post_cnt, user_info_cnt=user_info_cnt,user_introduction=user_introduction)
             PC_id = generate_unique_picture_id()
             # 默认路径
-            PC_path = "src\\assets\\avater.jpg"
+            PC_path = "profile.png"
             # 图片种类默认为0
             PC_category = 0
             PC_author_id = user

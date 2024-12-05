@@ -7,4 +7,4 @@
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (并禁用 Vetur)。
 
 ## 图标
-使用mdi图标苦
+使用mdi图标库
