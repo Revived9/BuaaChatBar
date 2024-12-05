@@ -31,7 +31,7 @@
   const post = ref({
     id: postId,
     title: "Vue 3 组件通信最佳实践",
-    content: "在 Vue 3 中，组件之间的通信方式主要包括：props/emit、provide/inject、Vuex 等。本文将详细介绍这些通信方式的最佳实践...",
+    content: "# Vue 3 组件通信最佳实践。 \n在 Vue 3 中，组件之间的通信方式主要包括：`props/emit`、`provide/inject`、`Vuex` 等。本文将**详细介绍**这些通信方式的最佳实践...\n1. 有序列表测试1\n 2. 有序列表测试2 \n - 无序列表测试1 \n - 无序列表测试2\n```c\nint main() { \n    return 0; \n}\n```\n所以",
     author: {
       id: 1,
       name: "张三",
