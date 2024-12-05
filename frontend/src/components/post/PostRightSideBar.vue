@@ -1,14 +1,9 @@
 <template>
     <div class="right-sidebar">
       <div class="action-buttons">
-        <button @click="scrollToTop" class="action-btn">
-          <i class="mdi mdi-arrow-up"></i>
-          <span>返回顶部</span>
-        </button>
-  
-        <button @click="toggleFloorPicker" class="action-btn">
-          <i class="mdi mdi-format-list-numbered"></i>
-          <span>跳转楼层</span>
+        <button @click="showReplyDialog" class="action-btn reply-btn">
+          <i class="mdi mdi-reply"></i>
+          <span>{{ isLoggedIn ? '回复帖子' : '登录以回复' }}</span>
         </button>
   
         <button @click="$emit('toggleAuthorOnly')" class="action-btn">
@@ -16,14 +11,19 @@
           <span>只看楼主</span>
         </button>
   
-        <button @click="$emit('reply')" class="action-btn primary">
-          <i class="mdi mdi-reply"></i>
-          <span>回复帖子</span>
-        </button>
-  
         <button @click="$emit('share')" class="action-btn">
           <i class="mdi mdi-share"></i>
           <span>分享帖子</span>
+        </button>
+  
+        <button @click="toggleFloorPicker" class="action-btn">
+          <i class="mdi mdi-format-list-numbered"></i>
+          <span>跳转楼层</span>
+        </button>
+  
+        <button @click="scrollToTop" class="action-btn">
+          <i class="mdi mdi-arrow-up"></i>
+          <span>返回顶部</span>
         </button>
       </div>
   
@@ -45,13 +45,36 @@
         </div>
       </div>
     </div>
+  
+    <ReplyPostDialog 
+      v-if="isReplyDialogVisible" 
+      :postId="postId"
+      @close="closeReplyDialog" 
+    />
+  
+    <LoginDialog
+      v-if="isLoginDialogVisible"
+      @close="closeLoginDialog"
+    />
   </template>
   
   <script setup>
-  import { ref } from 'vue'
+  import { ref, computed } from 'vue'
+  import { useStore } from 'vuex'
+  import ReplyPostDialog from '@/components/dialogs/ReplyPostDialog.vue'
+  import LoginDialog from '@/components/auth/LoginDialog.vue'
+  
+  const store = useStore()
+  
+  // 添加登录状态检查
+  const isLoggedIn = computed(() => store.state.user.isLoggedIn)
   
   defineProps({
     totalFloors: {
+      type: Number,
+      required: true
+    },
+    postId: {
       type: Number,
       required: true
     }
@@ -60,6 +83,8 @@
   defineEmits(['scrollToFloor', 'toggleAuthorOnly', 'reply', 'share'])
   
   const showFloorPicker = ref(false)
+  const isReplyDialogVisible = ref(false)
+  const isLoginDialogVisible = ref(false)
   
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -73,45 +98,74 @@
     emit('scrollToFloor', floor)
     showFloorPicker.value = false
   }
+  
+  const showReplyDialog = () => {
+    if (isLoggedIn.value) {
+      isReplyDialogVisible.value = true
+    } else {
+      isLoginDialogVisible.value = true
+    }
+  }
+  
+  const closeReplyDialog = () => {
+    isReplyDialogVisible.value = false
+  }
+  
+  const closeLoginDialog = () => {
+    isLoginDialogVisible.value = false
+  }
   </script>
   
   <style scoped>
   .right-sidebar {
     position: sticky;
     top: 20px;
-    width: 200px;
+    width: 140px;
     align-self: flex-start;
+    margin-left: 32px;
   }
   
   .action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
   
   .action-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
     border: none;
     border-radius: 4px;
-    background: white;
+    background-color: #e4edf6;
+    color: #000;
     cursor: pointer;
     transition: all 0.3s;
+    height: 36px;
+  }
+  
+  .action-btn i {
+    font-size: 1rem;
+  }
+  
+  .action-btn span {
+    font-size: 0.85rem;
+    white-space: nowrap;
   }
   
   .action-btn:hover {
-    background: #f0f0f0;
+    background: #d1e1f0;
   }
   
-  .action-btn.primary {
-    background: var(--primary-color);
+  .reply-btn {
+    background: #0153b8;
     color: white;
   }
   
-  .action-btn.primary:hover {
-    opacity: 0.9;
+  .reply-btn:hover {
+    background: #013A80;
   }
   
   .floor-picker {

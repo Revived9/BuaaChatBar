@@ -38,7 +38,7 @@ const isHomePage = computed(() => route.name === 'Home')
 
 .main-content-inner {
   width: 70%;
-  max-width: 1400px;
+  max-width: 1100px;
   margin: 0 auto;
   display: flex;
   padding: 20px 0;
