@@ -33,7 +33,7 @@ class Post(models.Model):
     post_label = models.CharField(max_length=30)
     post_tag_id = models.ForeignKey(Label, on_delete=models.CASCADE)
     post_heat = models.IntegerField()
-    post_time = models.DateField()
+    post_time = models.DateTimeField()
     post_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     post_isTop = models.BooleanField()
 
@@ -42,7 +42,7 @@ class FirstLayerComment(models.Model):
     objects = models.Manager()
     FLC_id = models.BigIntegerField(primary_key=True)
     FLC_content = models.TextField()
-    FLC_time = models.DateField()
+    FLC_time = models.DateTimeField()
     FLC_post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
     FLC_author_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -53,7 +53,7 @@ class SecondLayerComment(models.Model):
     SLC_author_id = models.ForeignKey(User, on_delete=models.CASCADE)
     SLC_comment_id = models.ForeignKey(FirstLayerComment, on_delete=models.CASCADE)
     SLC_content = models.TextField()
-    SLC_time = models.DateField()
+    SLC_time = models.DateTimeField()
 
 
 class CollectPost(models.Model):

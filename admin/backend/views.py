@@ -15,6 +15,8 @@ from rest_framework.utils import json
 from rest_framework.views import APIView
 from .models import *
 from datetime import datetime
+from django.utils import timezone
+from django.utils.timezone import localtime
 from django.db.models import F
 # Create your views here.
 
@@ -194,7 +196,8 @@ def createPost(request):
                 label.save()
             post_heat = 1
             res["heat"] = post_heat
-            post_time = datetime.now().date()
+            post_time = localtime(timezone.now())
+            print(post_time)
 
             post = Post(post_id=post_id, post_title=post_title, post_content=post_content, post_tag_id = label,
                         post_heat = post_heat, post_time = post_time,post_user_id = user, post_isTop = post_isTop,
@@ -305,7 +308,7 @@ def createFirstLayerComment(request):
             inform = Inform(IF_id = IF_id,IF_content = IF_content,IF_receiver_id = IF_receiver_id,IF_sender_id = IF_sender_id)
             inform.save()
             FLC_id = generate_unique_picture_id()
-            FLC_time = datetime.now().date()
+            FLC_time = localtime(timezone.now())
             FLC_content = content
             FLC_post_id = post
             FLC_author_id = user
@@ -358,7 +361,7 @@ def createSecondLayerComment(request):
             SLC_author_id = user
             SLC_comment_id = flc
             SLC_content = content
-            SLC_time = datetime.now().date()
+            SLC_time = localtime(timezone.now())
             # 经验+3
             user.user_experience = user.user_experience + 3
             user.save()
@@ -455,10 +458,10 @@ def modifyPicture(request):
         try:
             data = JSONParser().parse(request)
             user_id = data.get("user_id")
-            new_avater = data.get("new_avatar")
+            new_avatar = data.get("new_avatar")
             user = User.objects.get(user_student_id = user_id)
-            picture = Picture.objects.get(PC_author_id = user, PC_category = 0)
-            picture.PC_path = new_avater
+            picture = Picture.objects.get(PC_author_id = user)
+            picture.PC_path = new_avatar
             picture.save()
             res["code"] = 1
             res["message"] = "修改头像成功"
@@ -485,6 +488,7 @@ def getPostBriefInfo(request):
                                                                        'post_time', 'post_user_id')
                     post_list = list(posts)
                     for post in post_list:
+                        post['post_time'] = timezone.localtime(post['post_time']).strftime('%Y-%m-%d %H:%M:%S')
                         post_user_id = post['post_user_id']
                         post['username'] = User.objects.get(user_id=post_user_id).user_name
                         post['avatar'] = Picture.objects.get(PC_author_id=post_user_id).PC_path
@@ -494,6 +498,7 @@ def getPostBriefInfo(request):
                                                                        'post_time', 'post_user_id')
                     post_list = list(posts)
                     for post in post_list:
+                        post['post_time'] = timezone.localtime(post['post_time']).strftime('%Y-%m-%d %H:%M:%S')
                         post_user_id = post['post_user_id']
                         post['username'] = User.objects.get(user_id=post_user_id).user_name
                         post['avatar'] = Picture.objects.get(PC_author_id=post_user_id).PC_path
@@ -504,6 +509,7 @@ def getPostBriefInfo(request):
                                                                        'post_time', 'post_user_id', 'post_tag_id')
                     post_list = []
                     for post in posts:
+                        post['post_time'] = timezone.localtime(post['post_time']).strftime('%Y-%m-%d %H:%M:%S')
                         post_user_id = post['post_user_id']
                         post['username'] = User.objects.get(user_id=post_user_id).user_name
                         post['avatar'] = Picture.objects.get(PC_author_id=post_user_id).PC_path
@@ -516,6 +522,7 @@ def getPostBriefInfo(request):
                                                                        'post_time', 'post_user_id', 'post_tag_id')
                     post_list = []
                     for post in posts:
+                        post['post_time'] = timezone.localtime(post['post_time']).strftime('%Y-%m-%d %H:%M:%S')
                         post_user_id = post['post_user_id']
                         post['username'] = User.objects.get(user_id=post_user_id).user_name
                         post['avatar'] = Picture.objects.get(PC_author_id=post_user_id).PC_path
@@ -529,7 +536,6 @@ def getPostBriefInfo(request):
     else:
         res["code"] = -1
         res["message"] = "请使用POST方法"
-    print("!!")
     print(res["data"])
     return JsonResponse(res)
 
@@ -562,8 +568,6 @@ def getPostAllInfo(request):
             res["picture"] = pictureBackList
             comment_list = FirstLayerComment.objects.filter(FLC_post_id = post).values('FLC_id','FLC_content','FLC_time','FLC_author_id')
             comment_list1 = list(comment_list)
-            print("!!")
-            print(len(comment_list1))
             for comment in comment_list1:
                 comment['id'] = comment['FLC_id']
                 comment['content'] = comment['FLC_content']
@@ -590,17 +594,71 @@ def getPostAllInfo(request):
     return JsonResponse(res)
 
 
-# @csrf_exempt
-# def getAllComment(request):
-#     res = {"code": 1, "message": "", "data": None}
-#     if request.method == 'POST':
-#         try:
-#             data = JSONParser().parse(request)
-#
-#         except Exception as e:
-#             res["code"] = -1
-#             res["message"] = "获取帖子全部信息失败" + str(e)
-#     else:
-#         res["code"] = -1
-#         res["message"] = "请使用POST方法"
-#     return JsonResponse(res)
+@csrf_exempt
+def getTopThreeUserInfo(request):
+    res = {"code": 1, "message": "", "data": None}
+    if request.method == 'POST':
+        try:
+            data = JSONParser().parse(request)
+            users = User.objects.order_by('-user_experience').values('user_name','user_id','user_experience')
+            users_list = []
+            for user in users:
+                user_id = user['user_id']
+                picture = Picture.objects.get(PC_author_id=user_id)
+                user['avatar'] = picture.PC_path
+                user['username'] = user['user_name']
+                user['experience'] = user['user_experience']
+                if len(users_list) < 3:
+                    users_list.append(user)
+            res["data"] = users_list
+        except Exception as e:
+            res["code"] = -1
+            res["message"] = "拿到经验值前三信息失败" + str(e)
+    else:
+        res["code"] = -1
+        res["message"] = "请使用POST方法"
+    return JsonResponse(res)
+
+
+@csrf_exempt
+def getUserIntroduction(request):
+    res = {"code": 1, "message": "", "data": None,"bio":None}
+    if request.method == 'POST':
+        try:
+            data = JSONParser().parse(request)
+            user_id = data.get("user_id")
+            user = User.objects.get(user_student_id=user_id)
+            res["code"] = 1
+            res["bio"] = user.user_introduction
+        except Exception as e:
+            res["code"] = -1
+            res["message"] = "获取用户简介失败" + str(e)
+    else:
+        res["code"] = -1
+        res["message"] = "请使用POST方法"
+    return JsonResponse(res)
+
+
+@csrf_exempt
+def getInform(request):
+    res = {"code": 1, "message": "", "data": None}
+    if request.method == 'POST':
+        try:
+            data = JSONParser().parse(request)
+            user_id = data.get("user_id")
+            user = User.objects.get(user_student_id=user_id)
+            informList = Inform.objects.filter(IF_receiver_id=user)
+            infoBack = []
+            for inform in informList:
+                sender_name = inform.IF_sender_id.user_name
+                s = "你的帖子有来自用户"+str(sender_name) + "的评论"
+                infoBack.append(s)
+            res["data"] = infoBack
+            informList.delete()
+        except Exception as e:
+            res["code"] = -1
+            res["message"] = "获取通知失败" + str(e)
+    else:
+        res["code"] = -1
+        res["message"] = "请使用POST方法"
+    return JsonResponse(res)
