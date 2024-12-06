@@ -107,8 +107,11 @@ export const usernamemodify = async (username) => {
 // 使用 FormData 发送文件
 export const avatermodify = async (avater) => {
   const formData = new FormData();
-  formData.append('avatar', avater); // 'avatar' 是后端接收文件的字段名
+  formData.append('user_id', avater.user_id); // 'avatar' 是后端接收文件的字段名
+  formData.append('new_avatar',avater.new_avatar);
+  formData.append('image',avater.image);
   try {
+    console.log(formData)
     const response = await axios.post('http://127.0.0.1:8000/AvaterModify', formData, {
       headers: {
         'Content-Type': 'multipart/form-data' // 设置请求头，指示请求体类型

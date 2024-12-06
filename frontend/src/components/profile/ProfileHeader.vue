@@ -56,7 +56,7 @@
 <script setup>
 import {ref, nextTick, watch, computed} from 'vue'
 import {useStore} from "vuex";
-import {biomodify} from "@/services/api.js";
+import {biomodify, avatermodify} from "@/services/api.js";
 
 const store = useStore()
 
@@ -112,9 +112,15 @@ const handleAvatarClick = () => {
   input.accept = 'image/*'
   input.onchange = async (event) => {
     const file = event.target.files?.[0]
+    const avatar = {
+      user_id: store.state.user.studentId,
+      new_avatar: '',
+      image: file
+    }
     if (file) {
       // 使用 FormData 发送文件
-      const response = avatermodify(file)
+          console.log(avatar)
+      const response = avatermodify(avatar)
       const date = response.date
       // 如果上传成功，处理后端响应
       if (date.code === 1) {

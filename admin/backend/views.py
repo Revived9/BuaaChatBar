@@ -2,9 +2,11 @@ import code
 import random
 import os
 from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.sites import requests
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-
+import requests
+import re
 # Create your views here.
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -87,6 +89,32 @@ def generate_unique_inform_id():
         IF_id = random.randint(1000000000, 9999999999)  # 生成一个10位的随机数
         if not Inform.objects.filter(IF_id=IF_id).exists():
             return IF_id
+
+
+def modifyContentPicture(content, s):
+    """
+    该方法接受一个字符串类型的变量 content 和一个数组类型的变量 s。
+    方法会将 content 中所有形如 ![图片](blob:http://localhost:8080/87c65a1a-df11-4cf1-ac59-ee4e66f7c8c4) 的
+    (blob:http://localhost:8080/87c65a1a-df11-4cf1-ac59-ee4e66f7c8c4) 部分依次替换为数组 s 中的内容，索引从小到大。
+
+    :param content: 字符串类型的变量
+    :param s: 数组类型的变量
+    :return: 替换后的字符串
+    """
+    # 定义正则表达式匹配模式，确保右括号被转义
+    pattern = r'\(blob:http://localhost:8080/[a-f0-9\-]+\)'
+
+    # 使用正则表达式查找所有匹配项
+    matches = re.findall(pattern, content)
+
+    # 依次替换匹配项为数组 s 中的内容
+    for i, match in enumerate(matches):
+        if i < len(s):
+            # 替换 blob 链接部分，使用关键字参数 count
+            content = re.sub(r'!\[图片\]' + re.escape(match), f'![图片]({s[i]})', content, count=1)
+
+    return content
+
 @csrf_exempt
 def studentRegistration(request):
     res = {"code": 1, "message": "", "data": None,"id": -1}
@@ -457,21 +485,49 @@ def modifyPicture(request):
     res = {"code": 1, "message": "", "data": None}
     if request.method == 'POST':
         try:
-            data = JSONParser().parse(request)
+            data = request.POST
             user_id = data.get("user_id")
-            new_avatar = data.get("new_avatar")
+            image_file = request.FILES.get('image')
             user = User.objects.get(user_student_id = user_id)
             picture = Picture.objects.get(PC_author_id = user)
-            picture.PC_path = new_avatar
-            picture.save()
-            res["code"] = 1
-            res["message"] = "修改头像成功"
+            # 获取 SM.MS 的 API Token
+            api_token = 'RoQRscR3iQAQQ4aAgPxaJuEzZWgDn3b3'
+
+            # 查询图片是否存在
+            headers = {
+                 "Authorization": "RoQRscR3iQAQQ4aAgPxaJuEzZWgDn3b3"
+            }
+            files = {
+                'smfile': image_file  # 发送文件
+            }
+            response = requests.post('https://sm.ms/api/v2/upload', headers=headers,files=files)
+            response_data = response.json()
+            print("!!")
+            print(response_data.get('code'))
+            if response_data.get('code') == 'success':
+                data1 = response.json()
+                picture.PC_path = data1['data']['url']
+                picture.save()
+                res["code"] = 1
+                res["message"] = "修改头像成功"
+            elif response_data.get('code') == 'image_repeated':
+                data1 = response.json()
+                print("a")
+                picture.PC_path = data1['data']['url']
+                picture.save()
+                res["code"] = 1
+                res["message"] = "修改头像成功"
+            else:
+                print("b")
+                res["code"] = -1
+                res["message"] = "获取图床url失败"
         except Exception as e:
             res["code"] = -1
-            res["message"] = "修改邮件失败，用户id不存在" + str(e)
+            res["message"] = "修改头像失败，用户id不存在" + str(e)
     else:
         res["code"] = -1
         res["message"] = "请使用POST方法"
+    print(res["code"])
     return JsonResponse(res)
 
 
