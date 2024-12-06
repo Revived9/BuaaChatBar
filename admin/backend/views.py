@@ -498,12 +498,10 @@ def modifyPicture(request):
                  "Authorization": "RoQRscR3iQAQQ4aAgPxaJuEzZWgDn3b3"
             }
             files = {
-                'smfile': image_file  # 发送文件
+                'smfile': (image_file.name, image_file.file)  # 发送文件
             }
             response = requests.post('https://sm.ms/api/v2/upload', headers=headers,files=files)
             response_data = response.json()
-            print("!!")
-            print(response_data.get('code'))
             if response_data.get('code') == 'success':
                 data1 = response.json()
                 picture.PC_path = data1['data']['url']
@@ -512,8 +510,7 @@ def modifyPicture(request):
                 res["message"] = "修改头像成功"
             elif response_data.get('code') == 'image_repeated':
                 data1 = response.json()
-                print("a")
-                picture.PC_path = data1['data']['url']
+                picture.PC_path = data1['images']
                 picture.save()
                 res["code"] = 1
                 res["message"] = "修改头像成功"
