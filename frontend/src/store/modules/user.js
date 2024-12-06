@@ -6,7 +6,8 @@ export default {
     isLoggedIn: false,
     studentId: null,
     username: null,
-    avatar: null
+    avatar: null,
+    bio: null
   },
   mutations: {
     setLoginStatus(state, status) {
@@ -16,6 +17,7 @@ export default {
       state.username = userData.username
       state.avatar = userData.avatar
       state.studentId = userData.studentId
+      state.bio = userData.bio
     },
     setUsername(state, newUsername) {
      state.user.username = newUsername;

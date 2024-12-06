@@ -1,28 +1,32 @@
 <script setup>
 import { onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Header from '@/components/layout/Header.vue'
 import WelcomeBanner from '@/components/layout/WelcomeBanner.vue'
 import MainContent from '@/components/layout/MainContent.vue'
-import UserProfile from '@/views/UserProfile.vue'
 
 const store = useStore()
 const route = useRoute()
+const router = useRouter()
 
 // 计算当前页面类型
-const isUserProfilePage = computed(() => route.name === 'UserProfile')
-const isPostViewPage = computed(() => route.name === 'PostView')
+const isHomePage = computed(() => route.name === 'Home')
 
 onMounted(async () => {
   await store.dispatch('user/initUserState')
+  
+  // 如果在首页并且有查询参数，更新板块
+  if (route.query.section && route.path === '/') {
+    await store.dispatch('section/updateCurrentSection', route.query.section)
+  }
 })
 </script>
 
 <template>
   <div id="app">
     <Header />
-    <template v-if="!isUserProfilePage && !isPostViewPage">
+    <template v-if="isHomePage">
       <WelcomeBanner />
       <MainContent />
     </template>

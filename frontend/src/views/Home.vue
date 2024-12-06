@@ -45,29 +45,6 @@ const currentSort = ref('hot')
 const currentFilter = ref('all')
 const currentSection = computed(() => store.state.section.currentSection)
 
-const init_posts = ref([
-  {
-    id: 1,
-    post_title: "Vue 3 组件通信最佳实践",
-    username: "张三",
-    avatar: "/avatars/zhangsan.jpg",
-    post_time: new Date("2023-05-10T10:30:00"),
-    //category: "前端开发",
-    post_heat: 15,
-    solved: true
-  },
-  {
-    id: 2,
-    post_title: "如何优化 Webpack 构建速度？",
-    username: "李四",
-    avatar: "/avatars/lisi.jpg",
-    post_time: new Date("2023-05-09T16:45:00"),
-    //category: "工程化",
-    post_heat: 8,
-    solved: false
-  },
-])
-
 const posts = ref([])
 
 // 监视 currentSort 和 currentFilter 的变化，实时获取更新的帖子
@@ -78,10 +55,12 @@ const filteredPosts = async () => {
     section: currentSection.value
   }
   try {
-    //console.log(currentSection.value)
     const response = await getallpost(sortfilter)
-    posts.value = response.data.data // 更新 posts
-    //console.log(response.data.data)
+    if (response.data.code === 1) {
+      posts.value = response.data.data
+    } else {
+      console.error('获取帖子失败:', response.data.message)
+    }
   } catch (error) {
     console.error('Error fetching posts:', error)
   }
@@ -95,9 +74,7 @@ watch([currentSort, currentFilter, currentSection], async () => {
 
 // 初始化时获取数据（这里会使用 init_posts 作为初始数据，避免立即请求）
 onMounted(async () => {
-  // 只初始化一次，之后会根据排序和筛选条件从 API 获取数据
-  posts.value = [...init_posts.value]
-  await filteredPosts() // 如果需要从 API 拉取数据，则调用
+  await filteredPosts() // 直接获取后端数据
 })
 
 const formatTime = (date) => {

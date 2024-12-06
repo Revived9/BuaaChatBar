@@ -56,6 +56,7 @@
 <script setup>
 import {ref, nextTick, watch, computed} from 'vue'
 import {useStore} from "vuex";
+import {biomodify} from "@/services/api.js";
 
 const store = useStore()
 
@@ -136,29 +137,32 @@ const startEditBio = () => {
   })
 }
 
-/*
-// 保存简介
-const saveBio = () => {
-  if (editingBio.value !== props.userBio) {
-    emit('update-bio', editingBio.value)
-  }
-  isEditingBio.value = false
-}
-  */
-
 // 保存简介
 const saveBio = () => {
   if (editingBio.value !== props.userBio) {
     const bio = editingBio.value
-    const response = biomodify(bio)
-    const data = response.data
+    const bioall = {
+      user_id: store.state.user.studentId,
+      new_bio: bio
+    }
+    console.log(bioall)
+    const response = biomodify(bioall)
+    //const data = response.data
+    //alert('修改成功')
+    //userBio = data
+    emit('update-bio', editingBio.value)
+
+    /*
     // 请求成功，处理返回的结果
       if (data.code === 1) {
         alert('修改成功')
+        //userBio = data
         emit('update-bio', editingBio.value)
       } else {
         console.error('保存失败:', response.message);
       }
+
+     */
   }
   isEditingBio.value = false
 }

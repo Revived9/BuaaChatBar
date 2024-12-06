@@ -108,6 +108,8 @@ onMounted(async () => {
     birthday.value = currentUser.birthday || '未知'
     experience.value = currentUser.experience || 0
     userLevel.value = getUserLevel(experience.value)
+    console.log(currentUser)
+    userBio.value = currentUser.bio
      // 获取用户的帖子列表
     try {
       const userPosts = await store.dispatch('posts/getUserPosts', currentUser.student_id)
@@ -265,27 +267,8 @@ const handleAvatarClick = () => {
   input.click()
 }
 
-// 开始编辑简介
-const startEditBio = () => {
-  isEditingBio.value = true
-  newBio.value = userBio.value
-  // 等待 DOM 更新后聚焦输入框
-  nextTick(() => {
-    bioInput.value?.focus()
-  })
-}
-
-// 保存简介
-const saveBio = async () => {
-  if (newBio.value !== userBio.value) {
-    try {
-      await store.dispatch('user/updateUserBio', newBio.value)
-      userBio.value = newBio.value
-    } catch (error) {
-      console.error('保存简介失败:', error)
-    }
-  }
-  isEditingBio.value = false
+const handleBioUpdate = (newBio) => {
+  userBio.value = newBio
 }
 </script>
 

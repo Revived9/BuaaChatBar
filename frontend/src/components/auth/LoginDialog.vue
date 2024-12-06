@@ -75,7 +75,8 @@ const handleLogin = async () => {
       const userInfo = {
         username: data.username,
         avatar: data.path,
-        studentId: form.student_id
+        studentId: form.student_id,
+        bio: data.bio
       }
       localStorage.setItem('userInfo', JSON.stringify(userInfo))
       await store.dispatch('user/setLoginStatus', true)

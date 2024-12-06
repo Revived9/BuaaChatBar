@@ -2,9 +2,13 @@
 import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { createpost } from '@/services/api'
+import { useRouter, useRoute } from 'vue-router'
+import axios from 'axios';
 
 const store = useStore()
 const emit = defineEmits(['close'])
+const router = useRouter()
+const route = useRoute()
 
 const post = ref({
   title: '',
@@ -68,14 +72,59 @@ const selectSection = (section) => {
 }
 
 // 处理图片上传
-const handleFileUpload = (event) => {
-  const files = Array.from(event.target.files)
-  files.forEach(file => {
-    const url = URL.createObjectURL(file)
-    //post.value.images.push({ file, url })
-    post.value.images.push(url)
-  })
-}
+// const handleFileUpload = (event) => {
+//   const files = Array.from(event.target.files)
+//   files.forEach(file => {
+//     const url = URL.createObjectURL(file)
+//     post.value.images.push({ file, url })
+//     //post.value.images.push(url)
+//   })
+// }
+
+// 处理图片上传
+const handleFileUpload = async (event) => {
+  const files = Array.from(event.target.files);  // 将 FileList 转换成数组
+
+  // 存储上传后的图片 URL
+  const uploadedUrls = [];
+
+  // 遍历每个文件
+  for (let file of files) {
+    // 创建一个临时 URL 用于图片预览
+    const url = URL.createObjectURL(file);
+
+    // 添加到 post.value.images 数组中，供预览使用
+    post.value.images.push(url);
+
+    // 通过 FormData 创建上传请求
+    const formData = new FormData();
+    formData.append('smfile', file);  // "smfile" 为上传参数名，可能根据 API 需要修改
+
+    try {
+      // 修改请求 URL 为本地代理路径
+      const response = await axios.post('/upload/api/v2/upload', formData, {
+        headers: {
+          'Authorization': 'bVzljgnB88EDymGEIaNqkefoGPQxD1Uo',  // 需要替换为实际的 API Token
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.code === 'success') {
+        // 如果上传成功，获取图片的 URL
+        uploadedUrls.push(response.data.data.url);
+      } else {
+        console.error('上传失败:', response.data.msg);
+      }
+    } catch (error) {
+      console.error('请求失败:', error);
+    }
+  }
+
+  // 在上传完成后，你可以更新 post.value.images 数组（如果需要）
+  console.log('上传的图片 URLs:', uploadedUrls);
+  post.value.uploadedImages = uploadedUrls;  // 假设你要保存上传后的图片 URL
+};
+
 
 // 删除图片
 const removeImage = (index) => {
@@ -98,26 +147,26 @@ const removeTag = (tag) => {
 // 提交帖子
 const submitPost = async () => {
   try {
-    /*
-    // 创建 FormData 实例
-    const formData = new FormData();
-
-    // 将其他字段添加到 FormData 中
-    formData.append('title', post.value.title);
-    formData.append('content', post.value.content);
-    formData.append('section', post.value.section);
-    formData.append('tags', JSON.stringify(post.value.tags)); // 如果 tags 是数组，可能需要转成字符串
-    formData.append('user_id', post.value.user_id);
-    formData.append('images', JSON.stringify(post.value.images));
-    */
-
     // 调用 createpost 函数进行帖子发布
     const response = await createpost(post.value);
     const data = response.data;
     if (data.code === 1) {
       // 在请求成功后处理响应
       alert('发布成功');
-      location.reload();
+      
+      // 关闭对话框
+      emit('close');
+      
+      // 触发父组件的刷新方法
+      emit('refresh');
+      
+      // 如果在首页，刷新路由
+      if (route.path === '/') {
+        router.go(0);
+      } else {
+        // 跳转到首页
+        router.push('/');
+      }
     } else {
       // 处理发布失败的情况
       alert('发布失败: ' + data.message);
@@ -139,6 +188,7 @@ const getSectionStyle = (section) => {
     'border-color': section.color
   }
 }
+
 </script>
 
 <template>
@@ -198,7 +248,7 @@ const getSectionStyle = (section) => {
           </label>
           <div class="image-preview">
             <div v-for="(image, index) in post.images" :key="index" class="preview-item">
-              <img :src="image.url" alt="预览图片" />
+              <img :src="image" alt="预览图片" />
               <button @click="removeImage(index)" class="remove-image">&times;</button>
             </div>
           </div>

@@ -141,7 +141,7 @@ def studentRegistration(request):
 
 @csrf_exempt
 def studentLogin(request):
-    res = {"code": 1, "message": "", "data": None,"id": -1,"path": None,"username": None}
+    res = {"code": 1, "message": "", "data": None,"id": -1,"path": None,"username": None,"bio":None}
     if request.method == 'POST':
         try:
             data = JSONParser().parse(request)
@@ -155,6 +155,7 @@ def studentLogin(request):
                     user = User.objects.get(user_student_id=user_student_id)
                     picture = Picture.objects.get(PC_author_id = user)
                     res["id"] = user.user_id
+                    res["bio"] = user.user_introduction
                     res["username"] = user.user_name
                     res["path"] = picture.PC_path
                 else:

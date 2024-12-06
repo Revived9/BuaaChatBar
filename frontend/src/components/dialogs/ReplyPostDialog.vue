@@ -12,17 +12,22 @@
           <textarea 
             id="content" 
             v-model="content"
-            placeholder="请输入回复内容"
+            placeholder="请输入回复内容（支持 Markdown 格式）"
             required
+            ref="textarea"
           ></textarea>
         </div>
 
         <div class="form-group">
-          <label>图片</label>
           <label class="file-upload-btn">
             <i class="mdi mdi-image-plus"></i>
-            <span>选择图片</span>
-            <input type="file" @change="handleFileUpload" accept="image/*" multiple />
+            <span>插入图片</span>
+            <input 
+              type="file" 
+              @change="handleImageInsert" 
+              accept="image/*"
+              style="display: none"
+            />
           </label>
           <div class="image-preview">
             <div v-for="(image, index) in images" :key="index" class="preview-item">
@@ -46,9 +51,12 @@ import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { reply} from "@/services/api.js";
 import {getreplies} from "@/views/post/PostViewContainer.vue";
+import { useRouter, useRoute } from 'vue-router'
 
 const store = useStore()
 const emit = defineEmits(['close'])
+const router = useRouter()
+const route = useRoute()
 
 const props = defineProps({
   postId: {
@@ -59,6 +67,7 @@ const props = defineProps({
 
 const content = ref('')
 const images = ref([])
+const textarea = ref(null)
 
 // 处理图片上传
 const handleFileUpload = (event) => {
@@ -82,42 +91,32 @@ const handleSubmit = async () => {
   }
 
   try {
-    // 创建 FormData 实例
-    // const formData = new FormData()
-    // formData.append('content', replyContent.value)
-    // formData.append('post_id', props.postId)
-    // formData.append('user_id', store.state.user.studentId)
-    //
-    // // 添加图片
-    // images.value.forEach((image, index) => {
-    //   formData.append(`images[${index}]`, image.file)
-    // })
-
     const reply_content = {
-      content:content.value,
-      // images:getAllImageUrls(),
+      content: content.value,
       post_id: props.postId,
       user_id: store.state.user.studentId,
     }
-      //location.reload();
-    // TODO: 调用API发送回复
-    console.log(reply_content)
-    //console.log()
-     const response = await reply(reply_content)
+
+    const response = await reply(reply_content)
     const data = response.data;
     if (data.code === 1) {
-      alert(1)
-      await getreplies(props.postId)
       // 在请求成功后处理响应
       alert('发布成功');
-      //location.reload();
-      // 成功后关闭对话框
-      emit('close')
+      
+      // 关闭对话框
+      emit('close');
+      
+      // 触发父组件的刷新方法
+      emit('refresh');
+      
+      // 如果在帖子详情页，刷新路由
+      if (route.path.startsWith('/posts/')) {
+        router.go(0);
+      }
     } else {
       // 处理发布失败的情况
       alert('发布失败: ' + data.message);
     }
-
   } catch (error) {
     console.error('发送回复失败:', error)
     alert('发送回复失败,请重试')
@@ -127,6 +126,39 @@ const handleSubmit = async () => {
 // 获取所有 images 的 url
 const getAllImageUrls = () => {
   return images.value.map(image => image.url);
+}
+
+// 处理图片插入
+const handleImageInsert = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  try {
+    // 创建临时URL以预览图片
+    const imageUrl = URL.createObjectURL(file)
+    
+    // 获取光标位置
+    const textarea_el = textarea.value
+    const start = textarea_el.selectionStart
+    const end = textarea_el.selectionEnd
+    
+    // 在光标位置插入Markdown图片语法
+    const imageMarkdown = `![图片](${imageUrl})\n`
+    content.value = content.value.substring(0, start) + 
+                    imageMarkdown + 
+                    content.value.substring(end)
+    
+    // 更新光标位置
+    textarea_el.focus()
+    const newCursorPos = start + imageMarkdown.length
+    textarea_el.setSelectionRange(newCursorPos, newCursorPos)
+    
+    // 将图片添加到images数组中以便后续上传
+    images.value.push({ file, url: imageUrl })
+  } catch (error) {
+    console.error('插入图片失败:', error)
+    alert('插入图片失败，请重试')
+  }
 }
 </script>
 
@@ -147,9 +179,9 @@ const getAllImageUrls = () => {
 .dialog-content {
   background: white;
   border-radius: 12px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
+  width: 95%;
+  max-width: 800px;
+  max-height: 95vh;
   overflow-y: auto;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
 }
@@ -169,11 +201,11 @@ const getAllImageUrls = () => {
 }
 
 .dialog-body {
-  padding: 24px;
+  padding: 20px 24px 0;
 }
 
 .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .form-group label {
@@ -186,13 +218,13 @@ const getAllImageUrls = () => {
 
 textarea {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
+  min-height: 200px;
+  padding: 12px 16px;
+  border: 2px solid #e8e8e8;
   border-radius: 8px;
-  box-sizing: border-box;
-  font-size: 0.95rem;
-  min-height: 120px;
   resize: vertical;
+  font-size: 15px;
+  line-height: 1.6;
   transition: border-color 0.3s;
 }
 
@@ -225,8 +257,8 @@ input[type="file"] {
 
 .image-preview {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
   margin-top: 16px;
 }
 
@@ -239,7 +271,7 @@ input[type="file"] {
 
 .preview-item img {
   width: 100%;
-  height: 100px;
+  height: 120px;
   object-fit: cover;
 }
 
@@ -265,11 +297,12 @@ input[type="file"] {
 }
 
 .dialog-footer {
-  padding: 20px;
-  border-top: 1px solid #eee;
+  padding: 12px 24px;
+  border-top: 1px solid #f0f0f0;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  margin-top: 0;
 }
 
 .submit-btn,
@@ -316,5 +349,12 @@ input[type="file"] {
 
 .close-btn:hover {
   color: #666;
+}
+
+.markdown-editor,
+.markdown-editor:focus-within,
+.toolbar,
+.image-upload-btn {
+  /* 删除这些样式 */
 }
 </style> 

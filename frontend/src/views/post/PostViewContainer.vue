@@ -25,47 +25,19 @@
   import PostContent from '@/components/post/PostContent.vue'
   import PostRightSideBar from '@/components/post/PostRightSideBar.vue'
   import {getsinglepost} from "@/services/api.js";
+  import { watch } from 'vue';
   
   const route = useRoute()
   const postId = parseInt(route.params.id)
 
-    import { watch } from 'vue';
   
-  // 模拟帖子数据
-  const post = ref({
-    id: postId,
-    post_title: "Vue 3 组件通信最佳实践",
-    content: "在 Vue 3 中，组件之间的通信方式主要包括：props/emit、provide/inject、Vuex 等。本文将详细介绍这些通信方式的最佳实践...",
-    user_id: 1,
-    username: "张三",
-    avatar: "/avatars/zhangsan.jpg",
-    post_time: new Date("2024-01-10T10:30:00"),
-    section:'study',
-  })
+  // 初始化空数据
+  const post = ref({})
+  const replies = ref([])
 
-      watch(post, (newPost) => {
-      console.log('post updated:', newPost);
-    });
-  
-  // 模拟回复数据
-  const replies = ref([
-    {
-      id: 1,
-      content: "感谢分享，这篇文章对我很有帮助！",
-      user_id: 3,
-      username: "王五",
-      avatar: "/avatars/wangwu.jpg",
-      reply_time: new Date("2024-01-10T11:30:00")
-    },
-    {
-      id: 2,
-      content: "关于 provide/inject 的部分还请详细解释一下...",
-      user_id: 4,
-      username: "赵六",
-      avatar: "/avatars/zhaoliu.jpg",
-      reply_time: new Date("2024-01-10T13:45:00")
-    }
-  ])
+  watch(post, (newPost) => {
+    console.log('post updated:', newPost)
+  })
   
   // 处理楼层跳转
   const handleScrollToFloor = (floor) => {
@@ -120,7 +92,7 @@ onMounted(async () => {
       if (data.code === 1) {
         return data
       } else {
-        alert(data.message || '打开失败，请重试');
+        alert(data.message || '打开失败，请��试');
       }
     } catch (error) {
       console.error('打开失败:', error);

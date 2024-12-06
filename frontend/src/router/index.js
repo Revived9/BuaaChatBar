@@ -8,24 +8,29 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: Home,
+    meta: { keepAlive: true }
   },
   {
     path: '/posts/:id',
     name: 'PostView',
-    component: PostViewContainer
+    component: PostViewContainer,
+    props: true,
+    meta: { keepAlive: false }
   },
   {
     path: '/user/:studentId',
     name: 'UserProfile',
-    component: UserProfile
+    component: UserProfile,
+    props: true,
+    meta: { keepAlive: false }
   },
   {
     path: '/tags',
     name: 'Tags',
-    component: Tags
+    component: Tags,
+    meta: { keepAlive: true }
   }
-  // 其他路由...
 ]
 
 const router = createRouter({
