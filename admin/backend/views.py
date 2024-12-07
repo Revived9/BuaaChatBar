@@ -7,6 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import requests
 import re
+import certifi
 # Create your views here.
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -226,7 +227,6 @@ def createPost(request):
             post_heat = 1
             res["heat"] = post_heat
             post_time = localtime(timezone.now())
-            print(post_time)
 
             post = Post(post_id=post_id, post_title=post_title, post_content=post_content, post_tag_id = label,
                         post_heat = post_heat, post_time = post_time,post_user_id = user, post_isTop = post_isTop,
@@ -323,10 +323,30 @@ def createFirstLayerComment(request):
     res = {"code": 1, "message": "", "data": None,"comment_id": -1,"created_at": datetime.now().date(),"heat": 1,"path": None}
     if request.method == 'POST':
         try:
-            data = JSONParser().parse(request)
+            data = request.POST
             content = data.get("content")
             user_id = data.get("user_id")
             post_id = data.get("post_id")
+            images = request.FILES.getlist("image[]")
+            s = []
+            for image in images:
+                headers = {
+                    "Authorization": "RoQRscR3iQAQQ4aAgPxaJuEzZWgDn3b3"
+                }
+                files = {
+                    'smfile': (image.name, image.file)  # 发送文件
+                }
+                response = requests.post('https://smms.app/api/v2/upload', headers=headers, files=files)
+                response_data = response.json()
+                if response_data.get('code') == 'success':
+                    data1 = response.json()
+                    s.append(data1['data']['url'])
+                elif response_data.get('code') == 'image_repeated':
+                    data1 = response.json()
+                    s.append(data1['images'])
+                else:
+                    print("b!!!")
+
             user = User.objects.get(user_student_id = user_id)
             post = Post.objects.get(post_id=post_id)
             receiver = post.post_user_id
@@ -338,7 +358,7 @@ def createFirstLayerComment(request):
             inform.save()
             FLC_id = generate_unique_picture_id()
             FLC_time = localtime(timezone.now())
-            FLC_content = content
+            FLC_content = modifyContentPicture(content,s)
             FLC_post_id = post
             FLC_author_id = user
             # 经验+3
@@ -362,6 +382,7 @@ def createFirstLayerComment(request):
     else:
         res["code"] = -1
         res["message"] = "请使用POST方法"
+    print(res["code"])
     return JsonResponse(res)
 
 
@@ -500,7 +521,7 @@ def modifyPicture(request):
             files = {
                 'smfile': (image_file.name, image_file.file)  # 发送文件
             }
-            response = requests.post('https://sm.ms/api/v2/upload', headers=headers,files=files)
+            response = requests.post('https://smms.app/api/v2/upload', headers=headers,files=files)
             response_data = response.json()
             if response_data.get('code') == 'success':
                 data1 = response.json()

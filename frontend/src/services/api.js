@@ -211,10 +211,19 @@ export const getsinglepost = async (post) => {
 
 //发布评论
 export const reply = async (reply) => {
+  const formData = new FormData();
+  formData.append('content',reply.content)
+  formData.append('user_id', reply.user_id);
+  formData.append('post_id', reply.post_id);
+  // 处理文件数组，确保每个文件都被正确附加到 FormData
+  reply.image.forEach((file, index) => {
+    formData.append('image[]', file); // 使用相同字段名 "image[]" 以便后端能够识别为多个文件
+  });
   try {
-    const response = await axios.post('http://127.0.0.1:8000/Comment', JSON.stringify(reply), {
+    console.log(formData)
+    const response = await axios.post('http://127.0.0.1:8000/Comment', formData, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'multipart/form-data' // 设置请求头，指示请求体类型
       }
     });
     return response;

@@ -67,20 +67,24 @@ const props = defineProps({
 
 const content = ref('')
 const images = ref([])
+const image = ref([])
 const textarea = ref(null)
 
-// 处理图片上传
-const handleFileUpload = (event) => {
-  const files = Array.from(event.target.files)
-  files.forEach(file => {
-    const url = URL.createObjectURL(file)
-    images.value.push({ file, url })
-  })
-}
+// // 处理图片上传
+// const handleFileUpload = (event) => {
+//   const files = Array.from(event.target.files)
+//   console.log(files)
+//   files.forEach(file => {
+//     const url = URL.createObjectURL(file)
+//     images.value.push({ file, url })
+//     image.value.push(file)
+//   })
+// }
 
 // 删除图片
 const removeImage = (index) => {
   images.value.splice(index, 1)
+  image.value.splice(index, 1)
 }
 
 // 提交回复
@@ -95,9 +99,13 @@ const handleSubmit = async () => {
       content: content.value,
       post_id: props.postId,
       user_id: store.state.user.studentId,
+      image: image.value
     }
 
+    console.log(images.value)
+    console.log(image.value)
     const response = await reply(reply_content)
+
     const data = response.data;
     if (data.code === 1) {
       // 在请求成功后处理响应
@@ -121,11 +129,6 @@ const handleSubmit = async () => {
     console.error('发送回复失败:', error)
     alert('发送回复失败,请重试')
   }
-}
-
-// 获取所有 images 的 url
-const getAllImageUrls = () => {
-  return images.value.map(image => image.url);
 }
 
 // 处理图片插入
@@ -155,6 +158,9 @@ const handleImageInsert = async (event) => {
     
     // 将图片添加到images数组中以便后续上传
     images.value.push({ file, url: imageUrl })
+    console.log(file)
+    image.value.push(file)
+    console.log(image.value)
   } catch (error) {
     console.error('插入图片失败:', error)
     alert('插入图片失败，请重试')
