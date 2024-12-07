@@ -737,3 +737,22 @@ def getInform(request):
         res["code"] = -1
         res["message"] = "请使用POST方法"
     return JsonResponse(res)
+
+
+@csrf_exempt
+def getUserPost(request):
+    res = {"code": 1, "message": "", "data": None}
+    if request.method == 'POST':
+        try:
+            data = JSONParser().parse(request)
+            user_id = data.get("user_id")
+            user = User.objects.get(user_student_id=user_id)
+            post_list = Post.objects.filter(post_user_id=user).values('post_title','post_time','post_id')
+            res["data"] = list(post_list)
+        except Exception as e:
+            res["code"] = -1
+            res["message"] = "获取个人帖子失败" + str(e)
+    else:
+        res["code"] = -1
+        res["message"] = "请使用POST方法"
+    return JsonResponse(res)

@@ -10,18 +10,20 @@
     <div v-if="currentSection === 'posts'" class="section-content">
       <h2>我的主题</h2>
       <div v-if="posts.length > 0" class="posts-list">
-        <div v-for="post in posts" :key="post.id" class="post-item">
+        <div v-for="post in posts" :key="post.post_id" class="post-item">
           <div class="post-main">
-            <h3 class="post-title">{{ post.title }}</h3>
+            <h3 class="post-title">{{ post.post_title }}</h3>
             <div class="post-meta">
-              <span><i class="fal fa-clock" /> {{ formatDate(post.createTime) }}</span>
-              <span><i class="far fa-comment"></i> {{ post.replyCount }}回复</span>
-              <span><i class="far fa-heart"></i> {{ post.likeCount }}点赞</span>
+              <span>{{ formatDate(post.post_time) }}</span>
+<!--              <span><i class="fal fa-clock" /> {{ formatDate(post.post_time) }}</span>-->
+<!--              <span><i class="far fa-comment"></i> {{ post.replyCount }}回复</span>-->
+<!--              <span><i class="far fa-heart"></i> {{ post.likeCount }}点赞</span>-->
             </div>
           </div>
           <div v-if="isCurrentUser" class="post-actions">
-            <button @click="handleDeletePost(post.id)" class="delete-btn">
-              <i class="fas fa-trash"></i>
+            <button @click="handleDeletePost(post.post_id)" class="delete-btn">
+<!--              <i class="fas fa-trash"></i>-->
+              删除
             </button>
           </div>
         </div>
@@ -202,7 +204,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
-import {passwordmodify, emailmodify, usernamemodify} from "@/services/api.js";
+import {passwordmodify, emailmodify, usernamemodify, deletepost} from "@/services/api.js";
 
 const store = useStore()
 
@@ -296,8 +298,27 @@ const updateSetting = async (key) => {
   }
 }
 
-const handleDeletePost = (postId) => {
-  emit('deletePost', postId)
+const handleDeletePost = async (postId) => {
+  const delpost = {
+    user_id: store.state.user.studentId,
+    post_id: postId
+  }
+  try {
+    console.log(postId)
+  const result = await deletepost(delpost);
+  const data = result.data
+  //emit('deletePost', postId)
+    if (data.code === 1) {
+      alert('删除成功')
+    } else {
+      console.error('删除失败:', data.message)
+      alert(data.message || '删除失败')
+    }
+  } catch (error) {
+    console.error(error);
+    alert(error.message);  // 显示捕获到的错误信息
+  }
+
 }
 
 const formatDate = (date) => {
@@ -323,8 +344,8 @@ async function updatePassword() {
       // 显示成功提示
       alert('密码修改成功')
     } else {
-      console.error('更新密码失败:', error)
-      alert(error.message || '密码修改失败')
+      console.error('更新密码失败:', data.message)
+      alert(data.message || '密码修改失败')
     }
   } catch (error) {
     console.error(error);

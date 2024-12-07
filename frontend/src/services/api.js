@@ -155,7 +155,7 @@ export const createpost = async (post) => {
 //删除帖子
 export const deletepost = async (post) => {
   try {
-    const response = await axios.post('http://127.0.0.1:8000/DeletePost', JSON.stringify(bio), {
+    const response = await axios.post('http://127.0.0.1:8000/DeletePost', JSON.stringify(post), {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -171,6 +171,20 @@ export const getallpost = async (post) => {
   try {
     console.log(post)
     const response = await axios.post('http://127.0.0.1:8000/GetAllPost', JSON.stringify(post), {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response;
+  } catch (error) {
+    throw new Error('BAD getallpost');
+  }
+}
+
+export const getpersonpost = async (post) => {
+  try {
+    //console.log(post)
+    const response = await axios.post('http://127.0.0.1:8000/GetPersonPost', JSON.stringify(post), {
       headers: {
         'Content-Type': 'application/json'
       }

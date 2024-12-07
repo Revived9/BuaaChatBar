@@ -16,4 +16,5 @@ urlpatterns = [
     path('GetAllPost', views.getPostBriefInfo),
     path('GetSinglePost', views.getPostAllInfo),
     path('GetAllReplies', views.getPostAllInfo),
+    path('GetPersonPost', views.getUserPost),
 ]

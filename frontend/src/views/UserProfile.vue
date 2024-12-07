@@ -33,6 +33,7 @@ import { useStore } from 'vuex'
 import ProfileHeader from '@/components/profile/ProfileHeader.vue'
 import ProfileList from '@/components/profile/ProfileList.vue'
 import ProfileArea from '@/components/profile/ProfileArea.vue'
+import {getpersonpost} from "@/services/api.js";
 
 const route = useRoute()
 const store = useStore()
@@ -87,6 +88,7 @@ const isLoggedIn = computed(() => store.state.user.isLoggedIn)
 
 // 监听 store 中的用户名变化
 import { watchEffect } from 'vue';
+import {getallpost} from "@/services/api.js";
 
 // 监听 store 中的用户名变化
 watch(
@@ -108,14 +110,22 @@ onMounted(async () => {
     birthday.value = currentUser.birthday || '未知'
     experience.value = currentUser.experience || 0
     userLevel.value = getUserLevel(experience.value)
-    console.log(currentUser)
+    //console.log(currentUser)
     userBio.value = currentUser.bio
      // 获取用户的帖子列表
     try {
-      const userPosts = await store.dispatch('posts/getUserPosts', currentUser.student_id)
-      posts.value = userPosts
+      const post = {
+        user_id: store.state.user.studentId
+      }
+      const response = await getpersonpost(post)
+      if (response.data.code === 1) {
+        posts.value = response.data.data
+        //console.log(posts.value)
+      } else {
+        console.error('获取帖子失败:', response.data.message)
+      }
     } catch (error) {
-      console.error('获取用户帖子失败:', error)
+      console.error('Error fetching posts:', error)
     }
   } else {
     try {

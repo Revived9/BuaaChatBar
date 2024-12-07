@@ -41,7 +41,7 @@ defineProps({
 defineEmits(['update:modelValue'])
 
 const mainMenuItems = [
-  { id: 'replies', name: '回复', icon: 'fas fa-comment', count: 0 },
+  //{ id: 'replies', name: '回复', icon: 'fas fa-comment', count: 0 },
   { id: 'posts', name: '主题', icon: 'fas fa-bars', count: 0 },
   //{ id: 'badges', name: '徽章', icon: 'fas fa-medal', count: 0 },
   //{ id: 'likes', name: '赞', icon: 'fas fa-heart', count: 0 },
