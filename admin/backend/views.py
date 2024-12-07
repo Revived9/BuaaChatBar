@@ -299,7 +299,7 @@ def deletePost(request):
             post_id = data.get("post_id")
             post = Post.objects.get(post_id=post_id)
             user = User.objects.get(user_student_id = user_id)
-            if post.post_user_id == user_id:
+            if post.post_user_id == user:
                 user.user_post_cnt = user.user_post_cnt - 1
                 user.save()
                 post.delete()
