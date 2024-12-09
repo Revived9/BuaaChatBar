@@ -22,13 +22,21 @@
         <div class="post-content">
           <h3 class="post-title">{{ post.post_title }}</h3>
           <div class="post-meta">
-            <span class="author">{{ post.username }}</span>
-            <span class="time">{{ formatTime(post.post_time) }}</span>
-<!--            <span class="category">{{ post.post_heat }}</span>-->
+            <span class="author">
+              <i class="mdi mdi-account"></i>
+              <span>{{ post.username }}</span>
+            </span>
+            <span class="time">
+              <i class="mdi mdi-clock-outline"></i>
+              <span>{{ formatTime(post.post_time) }}</span>
+            </span>
           </div>
         </div>
         <div class="post-stats">
-          <span class="reply-count">{{ post.post_heat }} 热度</span>
+          <span class="reply-count">
+            <i class="mdi mdi-chat"></i>
+            <span>{{ post.post_heat }}</span>
+          </span>
         </div>
       </div>
     </div>
@@ -176,20 +184,49 @@ const navigateToPost = async (postId) => {
 .post-title {
   font-size: 1.1rem;
   margin: 0 0 5px 0;
+  font-weight: 600;  /* 加粗 */
+  color: #1a1a1a;  /* 更深的颜色 */
 }
 
 .post-meta {
   font-size: 0.9rem;
   color: #666;
+  display: flex;
+  align-items: center;
+  gap: 20px;  /* 增大间距 */
 }
 
-.post-meta>* {
-  margin-right: 10px;
+.author, .time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #999;  /* 统一使用浅灰色 */
+}
+
+.author {
+  font-weight: normal;  /* 取消加粗 */
+  font-size: 0.9em;  /* 恢复默认大小 */
+}
+
+.author i, .time i {
+  font-size: 1.1em;
 }
 
 .post-stats {
   font-size: 0.9rem;
   color: #666;
+  display: flex;
+  align-items: center;
+}
+
+.reply-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;  /* 增大间距 */
+}
+
+.reply-count i {
+  font-size: 1.1em;
 }
 
 @media (max-width: 1024px) {

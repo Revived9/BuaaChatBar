@@ -5,8 +5,13 @@
       <ul class="user-list">
         <li v-for="user in activeUsers" :key="user.id">
           <img :src="user.avatar" :alt="user.username" />
-          <span>{{ user.username }}</span>
-          <span class="score">{{ user.experience }}</span>
+          <div class="user-info">
+            <span class="username">{{ user.username }}</span>
+            <div class="experience-info">
+              <i class="mdi mdi-chat"></i>
+              <span>{{ user.experience }}</span>
+            </div>
+          </div>
         </li>
       </ul>
     </div>
@@ -30,40 +35,68 @@ onMounted(async () => {
 
 <style scoped>
 .right-sidebar {
-  background-color: #fff;
-  /* 移除了 border-radius 和 box-shadow */
   margin-bottom: 20px;
 }
 
 .monthly-active {
-  padding: 15px;
+  padding: 0;
 }
 
-.monthly-active h3{
+.monthly-active h3 {
   color: var(--primary-color);
+  margin-bottom: 10px;
+  padding: 0 15px;
 }
 
 .user-list {
   list-style-type: none;
-  padding: 0;
+  padding: 15px;
+  background-color: #e4edf6;
+  border-radius: 4px;
+  height: fit-content;
 }
 
 .user-list li {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.user-list li:last-child {
+  border-bottom: none;
 }
 
 .user-list img {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
-.user-list .score {
-  margin-left: auto;
-  font-weight: bold;
-  color: var(--primary-color);
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.username {
+  font-weight: 500;
+  color: #333;
+  font-size: 1.1em;
+}
+
+.experience-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.experience-info i {
+  font-size: 1.1em;
+  color: #666;
 }
 </style>

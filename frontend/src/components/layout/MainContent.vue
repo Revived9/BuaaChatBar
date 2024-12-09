@@ -40,20 +40,22 @@ const isHomePage = computed(() => route.name === 'Home')
   width: 70%;
   max-width: 1100px;
   margin: 0 auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: 200px minmax(0, 3fr) 180px;
+  gap: 24px;
   padding: 20px 0;
   box-sizing: border-box;
 }
 
 .center-content {
-  flex-grow: 1;
+  min-width: 0;
   padding: 0 20px;
 }
 
 @media (max-width: 1024px) {
   .main-content-inner {
     width: 90%;
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
   
   .center-content {

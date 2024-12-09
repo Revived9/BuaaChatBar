@@ -20,7 +20,10 @@ export default {
       state.bio = userData.bio
     },
     setUsername(state, newUsername) {
-     state.user.username = newUsername;
+      state.username = newUsername;
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      userInfo.username = newUsername;
+      localStorage.setItem('userInfo', JSON.stringify(userInfo));
     },
     clearUserData(state) {
       state.isLoggedIn = false

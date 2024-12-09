@@ -21,6 +21,7 @@ const post = ref({
 })
 
 const tagInput = ref('')
+const textarea = ref(null)
 
 // 获取所有非筛选类板块
 const sections = [
@@ -72,26 +73,44 @@ const selectSection = (section) => {
   post.value.section = section.id
 }
 
-// 处理图片上传
-const handleFileUpload = async (event) => {
-  const files = Array.from(event.target.files);  // 将 FileList 转换成数组
+// 处理图片插入
+const handleImageInsert = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
 
-  // 遍历每个文件
-  for (let file of files) {
-    // 创建一个临时 URL 用于图片预览
-    const url = URL.createObjectURL(file);
-
-    // 添加到 post.value.images 数组中，供预览使用
-    post.value.images.push(url);
-    post.value.image.push(file);
+  try {
+    // 创建临时URL以预览图片
+    const imageUrl = URL.createObjectURL(file)
+    
+    // 获取光标位置
+    const textarea_el = textarea.value
+    const start = textarea_el.selectionStart
+    const end = textarea_el.selectionEnd
+    
+    // 在光标位置插入Markdown图片语法
+    const imageMarkdown = `![图片](${imageUrl})\n`
+    post.value.content = post.value.content.substring(0, start) + 
+                        imageMarkdown + 
+                        post.value.content.substring(end)
+    
+    // 更新光标位置
+    textarea_el.focus()
+    const newCursorPos = start + imageMarkdown.length
+    textarea_el.setSelectionRange(newCursorPos, newCursorPos)
+    
+    // 将图片添加到images数组中以便后续上传
+    post.value.images.push({ file, url: imageUrl })
+    post.value.image.push(file)
+  } catch (error) {
+    console.error('插入图片失败:', error)
+    alert('插入图片失败，请重试')
   }
-
-};
-
+}
 
 // 删除图片
 const removeImage = (index) => {
   post.value.images.splice(index, 1)
+  post.value.image.splice(index, 1)
 }
 
 // 添加标签
@@ -185,33 +204,29 @@ const getSectionStyle = (section) => {
 
         <div class="form-group">
           <label for="content">内容</label>
-          <textarea id="content" v-model="post.content" placeholder="请输入内容" required></textarea>
+          <textarea 
+            id="content" 
+            v-model="post.content" 
+            placeholder="请输入内容（支持 Markdown 格式）" 
+            required
+            ref="textarea"
+          ></textarea>
         </div>
 
-
-        <!-- <div class="form-group">
-          <label>标签</label>
-          <div class="tag-input">
-            <input type="text" v-model="tagInput" @keyup.enter="addTag" placeholder="输入标签后按回车添加" />
-          </div>
-          <div class="tags-container">
-            <span v-for="tag in post.tags" :key="tag" class="tag">
-              {{ tag }}
-              <button @click="removeTag(tag)" class="remove-tag">&times;</button>
-            </span>
-          </div>
-        </div> -->
-
         <div class="form-group">
-          <label>图片</label>
           <label class="file-upload-btn">
             <i class="mdi mdi-image-plus"></i>
-            <span>选择图片</span>
-            <input type="file" @change="handleFileUpload" accept="image/*" multiple />
+            <span>插入图片</span>
+            <input 
+              type="file" 
+              @change="handleImageInsert" 
+              accept="image/*"
+              style="display: none"
+            />
           </label>
           <div class="image-preview">
             <div v-for="(image, index) in post.images" :key="index" class="preview-item">
-              <img :src="image" alt="预览图片" />
+              <img :src="image.url" alt="预览图片" />
               <button @click="removeImage(index)" class="remove-image">&times;</button>
             </div>
           </div>

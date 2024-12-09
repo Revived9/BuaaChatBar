@@ -42,15 +42,15 @@ defineEmits(['update:modelValue'])
 
 const mainMenuItems = [
   //{ id: 'replies', name: '回复', icon: 'fas fa-comment', count: 0 },
-  { id: 'posts', name: '主题', icon: 'fas fa-bars', count: 0 },
+  { id: 'posts', name: '主题', icon: 'mdi mdi-comment', count: 0 },
   //{ id: 'badges', name: '徽章', icon: 'fas fa-medal', count: 0 },
   //{ id: 'likes', name: '赞', icon: 'fas fa-heart', count: 0 },
   //{ id: 'mentions', name: '被提及', icon: 'fas fa-at', count: 0 },
 ]
 
 const settingsMenuItems = [
-  { id: 'settings', name: '设置', icon: 'fas fa-cog' },
-  { id: 'security', name: '安全', icon: 'fas fa-shield-alt' },
+  { id: 'settings', name: '设置', icon: 'mdi mdi-cog' },
+  { id: 'security', name: '安全', icon: 'mdi mdi-shield-check' },
 ]
 </script>
 

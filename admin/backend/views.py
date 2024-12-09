@@ -207,12 +207,31 @@ def createPost(request):
     res = {"code": 1, "message": "", "data": None, "heat": 1,"id": -1,"created_at": datetime.now().date()}
     if request.method == 'POST':
         try:
-            data = JSONParser().parse(request)
+            data = request.POST
             post_id = generate_unique_post_id()
             post_title = data.get("title")
-            post_content = data.get("content")
+            post_content1 = data.get("content")
             post_user_id = data.get("user_id")
-            post_images = data.get("images")
+            post_images = []
+            images = request.FILES.getlist("image[]")
+            s = []
+            for image1 in images:
+                headers = {
+                    "Authorization": "RoQRscR3iQAQQ4aAgPxaJuEzZWgDn3b3"
+                }
+                files = {
+                    'smfile': (image1.name, image1.file)  # 发送文件
+                }
+                response = requests.post('https://smms.app/api/v2/upload', headers=headers, files=files)
+                response_data = response.json()
+                if response_data.get('code') == 'success':
+                    data1 = response.json()
+                    s.append(data1['data']['url'])
+                elif response_data.get('code') == 'image_repeated':
+                    data1 = response.json()
+                    s.append(data1['images'])
+                else:
+                    print("b!!!")
 
             post_label = 'aaa'
             post_isTop = False
@@ -227,7 +246,7 @@ def createPost(request):
             post_heat = 1
             res["heat"] = post_heat
             post_time = localtime(timezone.now())
-
+            post_content = modifyContentPicture(post_content1,s)
             post = Post(post_id=post_id, post_title=post_title, post_content=post_content, post_tag_id = label,
                         post_heat = post_heat, post_time = post_time,post_user_id = user, post_isTop = post_isTop,
                         post_label = post_label)
@@ -505,7 +524,7 @@ def modifyIntroduction(request):
 def modifyPicture(request):
     res = {"code": 1, "message": "", "data": None}
     if request.method == 'POST':
-        try:
+        try: 
             data = request.POST
             user_id = data.get("user_id")
             image_file = request.FILES.get('image')
@@ -754,6 +773,25 @@ def getUserPost(request):
         except Exception as e:
             res["code"] = -1
             res["message"] = "获取个人帖子失败" + str(e)
+    else:
+        res["code"] = -1
+        res["message"] = "请使用POST方法"
+    return JsonResponse(res)
+
+
+@csrf_exempt
+def getUserAvatar(request):
+    res = {"code": 1, "message": "", "data": None,"avatar":None}
+    if request.method == 'POST':
+        try:
+            data = JSONParser().parse(request)
+            user_id = data.get("user_id")
+            user = User.objects.get(user_student_id=user_id)
+            picture = Picture.objects.get(PC_author_id=user)
+            res["avatar"] = picture.PC_path
+        except Exception as e:
+            res["code"] = -1
+            res["message"] = "获取个人信息失败" + str(e)
     else:
         res["code"] = -1
         res["message"] = "请使用POST方法"

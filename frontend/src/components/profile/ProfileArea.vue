@@ -184,7 +184,7 @@
               v-model="securityForm.newUsername"
               placeholder="请输入新昵称"
             >
-            <p class="input-tip">2-15个字符，可以是中文、字母、数字</p>
+            <p class="input-tip">2-15个字符，可以是��文、字母、数字</p>
           </div>
           <div class="form-actions">
             <button 
@@ -246,7 +246,7 @@ const securityForm = ref({
 const currentEmail = computed(() => store.state.user.email)
 const currentUsername = computed(() => store.state.user.username)
 
-// 表单验证
+// ��单验证
 const canUpdatePassword = computed(() => {
   const { old_password, new_password, confirmPassword } = securityForm.value
   return old_password &&
@@ -378,9 +378,8 @@ async function updateUsername() {
     const result = await usernamemodify(securityForm.value);
     const data = result.data
     if (data.code === 1) {
-      //更新数据
-      console.log(securityForm.value.newUsername)
-      await store.dispatch('updateUsername', securityForm.value.newUsername)
+      // 更新 Vuex store 中的用户名
+      await store.dispatch('user/updateUsername', securityForm.value.newUsername)
       // 清空表单
       securityForm.value.newUsername = ''
       // 显示成功提示
@@ -391,7 +390,7 @@ async function updateUsername() {
     }
   } catch (error) {
     console.error(error);
-    alert(error.message);  // 显示捕获到的错误信息
+    alert(error.message);
   }
 }
 </script>

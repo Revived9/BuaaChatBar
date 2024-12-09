@@ -18,4 +18,5 @@ urlpatterns = [
     path('GetAllReplies', views.getPostAllInfo),
     path('GetPersonPost', views.getUserPost),
     path('GetUsers', views.getTopThreeUserInfo),
+    path('GetUserAvatar', views.getUserAvatar),
 ]
