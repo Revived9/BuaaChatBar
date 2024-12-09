@@ -8,6 +8,10 @@
             <option value="new">最新发布</option>
           </select>
         </div>
+<!--        <div class="search-container">-->
+<!--          <input type="text" placeholder="搜索" class="search-input" v-model="searchQuery" />-->
+<!--          <i class="iconfont icon-search" @click="performSearch"></i>-->
+<!--        </div>-->
       </div>
     </div>
     <div class="post-list">

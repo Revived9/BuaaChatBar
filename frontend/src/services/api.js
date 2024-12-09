@@ -139,10 +139,21 @@ export const biomodify = async (bio) => {
 
 // 发布帖子
 export const createpost = async (post) => {
+  const formData = new FormData();
+  formData.append('content',post.content)
+  formData.append('user_id', post.user_id);
+  formData.append('section', post.section);
+  formData.append('title',post.title);
+
+  // 处理文件数组，确保每个文件都被正确附加到 FormData
+  post.image.forEach((file, index) => {
+    formData.append('image[]', file); // 使用相同字段名 "image[]" 以便后端能够识别为多个文件
+  });
   try {
-    const response = await axios.post('http://127.0.0.1:8000/CreatePost', JSON.stringify(post), {
+    console.log(formData)
+    const response = await axios.post('http://127.0.0.1:8000/CreatePost', formData, {
       headers: {
-        'Content-Type': 'application/json'  // 这里改成 JSON 格式
+        'Content-Type': 'multipart/form-data' // 设置请求头，指示请求体类型
       }
     });
     return response;
@@ -256,6 +267,16 @@ export const getallreplies = async (post) => {
     return response;
   } catch (error) {
     throw new Error('BAD getallpost');
+  }
+}
+
+// 使用获取经验榜单
+export const fetchUsers = async () => {
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/GetUsers')
+    return response;
+  } catch (error) {
+    console.error('获取用户数据失败:', error)
   }
 }
 

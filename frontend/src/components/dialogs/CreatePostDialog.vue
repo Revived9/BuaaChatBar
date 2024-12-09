@@ -16,6 +16,7 @@ const post = ref({
   section: '',  // 当前选中的板块
   tags: [],
   images: [],
+  image: [],
   user_id: store.state.user.studentId
 })
 
@@ -72,21 +73,8 @@ const selectSection = (section) => {
 }
 
 // 处理图片上传
-// const handleFileUpload = (event) => {
-//   const files = Array.from(event.target.files)
-//   files.forEach(file => {
-//     const url = URL.createObjectURL(file)
-//     post.value.images.push({ file, url })
-//     //post.value.images.push(url)
-//   })
-// }
-
-// 处理图片上传
 const handleFileUpload = async (event) => {
   const files = Array.from(event.target.files);  // 将 FileList 转换成数组
-
-  // 存储上传后的图片 URL
-  const uploadedUrls = [];
 
   // 遍历每个文件
   for (let file of files) {
@@ -95,34 +83,9 @@ const handleFileUpload = async (event) => {
 
     // 添加到 post.value.images 数组中，供预览使用
     post.value.images.push(url);
-
-    // 通过 FormData 创建上传请求
-    const formData = new FormData();
-    formData.append('smfile', file);  // "smfile" 为上传参数名，可能根据 API 需要修改
-
-    try {
-      // 修改请求 URL 为本地代理路径
-      const response = await axios.post('/upload/api/v2/upload', formData, {
-        headers: {
-          'Authorization': 'bVzljgnB88EDymGEIaNqkefoGPQxD1Uo',  // 需要替换为实际的 API Token
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      if (response.data.code === 'success') {
-        // 如果上传成功，获取图片的 URL
-        uploadedUrls.push(response.data.data.url);
-      } else {
-        console.error('上传失败:', response.data.msg);
-      }
-    } catch (error) {
-      console.error('请求失败:', error);
-    }
+    post.value.image.push(file);
   }
 
-  // 在上传完成后，你可以更新 post.value.images 数组（如果需要）
-  console.log('上传的图片 URLs:', uploadedUrls);
-  post.value.uploadedImages = uploadedUrls;  // 假设你要保存上传后的图片 URL
 };
 
 

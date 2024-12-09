@@ -674,7 +674,7 @@ def getTopThreeUserInfo(request):
     res = {"code": 1, "message": "", "data": None}
     if request.method == 'POST':
         try:
-            data = JSONParser().parse(request)
+            # data = JSONParser().parse(request)
             users = User.objects.order_by('-user_experience').values('user_name','user_id','user_experience')
             users_list = []
             for user in users:
@@ -686,6 +686,8 @@ def getTopThreeUserInfo(request):
                 if len(users_list) < 3:
                     users_list.append(user)
             res["data"] = users_list
+            print("!!")
+            print(res["data"])
         except Exception as e:
             res["code"] = -1
             res["message"] = "拿到经验值前三信息失败" + str(e)

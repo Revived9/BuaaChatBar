@@ -1,12 +1,12 @@
 <template>
   <aside class="right-sidebar">
     <div class="monthly-active">
-      <h3>月活榜单</h3>
+      <h3>经验榜单</h3>
       <ul class="user-list">
         <li v-for="user in activeUsers" :key="user.id">
-          <img :src="user.avatar" :alt="user.name" />
-          <span>{{ user.name }}</span>
-          <span class="score">{{ user.score }}</span>
+          <img :src="user.avatar" :alt="user.username" />
+          <span>{{ user.username }}</span>
+          <span class="score">{{ user.experience }}</span>
         </li>
       </ul>
     </div>
@@ -14,14 +14,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import {fetchUsers} from "@/services/api.js";
 
-const activeUsers = ref([
-  { id: 1, name: '用户1', avatar: 'path/to/avatar1.jpg', score: 100 },
-  { id: 2, name: '用户2', avatar: 'path/to/avatar2.jpg', score: 90 },
-  { id: 3, name: '用户3', avatar: 'path/to/avatar3.jpg', score: 80 },
-  // 添加更多用户...
-])
+const activeUsers = ref([])
+
+// 页面加载时调用 fetchUsers
+onMounted(async () => {
+  const response = await fetchUsers()
+  activeUsers.value = response.data.data  // 假设返回的数据是一个数组
+  console.log(activeUsers.value)
+})
+
 </script>
 
 <style scoped>
