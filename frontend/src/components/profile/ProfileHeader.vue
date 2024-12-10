@@ -56,7 +56,7 @@
 <script setup>
 import {ref, nextTick, watch, computed} from 'vue'
 import {useStore} from "vuex";
-import {biomodify, avatermodify} from "@/services/api.js";
+import {biomodify, avatermodify, getUserAvatar} from "@/services/api.js";
 
 const store = useStore()
 
@@ -111,25 +111,47 @@ const handleAvatarClick = () => {
   input.type = 'file'
   input.accept = 'image/*'
   input.onchange = async (event) => {
-    const file = event.target.files?.[0]
-    const avatar = {
-      user_id: store.state.user.studentId,
-      new_avatar: '',
-      image: file
-    }
-    if (file) {
-      // 使用 FormData 发送文件
-          console.log(avatar)
-      const response = avatermodify(avatar)
-      const date = response.date
-      // 如果上传成功，处理后端响应
-      if (date.code === 1) {
-        alert('修改成功')
-        emit('update-avatar', file)
-      } else {
-        alert(data.message || '上传失败，请重试');
+    try {
+      const file = event.target.files?.[0]
+      if (!file) return
+      
+      const avatar = {
+        user_id: store.state.user.studentId,
+        new_avatar: '',
+        image: file
       }
-    }    
+      
+      // 上传新头像
+      const response = await avatermodify(avatar)
+      const data = response.data
+      
+      if (data.code === 1) {
+        // 获取最新的头像URL
+        const avatarResponse = await getUserAvatar(store.state.user.studentId)
+        const avatarData = avatarResponse.data
+        
+        if (avatarData.code === 1) {
+          // 更新 Vuex store 中的头像
+          await store.dispatch('user/updateAvatar', avatarData.avatar)
+          // 更新 localStorage 中的头像
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+          userInfo.avatar = avatarData.avatar
+          localStorage.setItem('userInfo', JSON.stringify(userInfo))
+          
+          alert('修改成功')
+          emit('update-avatar', file)
+        } else {
+          console.error('获取头像失败:', avatarData.message)
+          alert(avatarData.message || '获取新头像失败')
+        }
+      } else {
+        console.error('上传失败:', data.message)
+        alert(data.message || '上传失败，请重试')
+      }
+    } catch (error) {
+      console.error('头像上传失败:', error)
+      alert(error.message || '头像上传失败，请重试')
+    }
   }
   input.click()
 }

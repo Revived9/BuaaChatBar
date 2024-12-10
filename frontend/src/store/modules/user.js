@@ -30,6 +30,12 @@ export default {
       state.username = null
       state.avatar = null
       state.studentId = null
+    },
+    SET_AVATAR(state, avatarUrl) {
+      state.avatar = avatarUrl
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+      userInfo.avatar = avatarUrl
+      localStorage.setItem('userInfo', JSON.stringify(userInfo))
     }
   },
   actions: {
@@ -63,6 +69,9 @@ export default {
           localStorage.removeItem('userInfo')
         }
       }
+    },
+    updateAvatar({ commit }, avatarUrl) {
+      commit('SET_AVATAR', avatarUrl)
     }
   }
 }

@@ -13,10 +13,6 @@
       </nav> -->
 
       <div class="user-actions">
-        <div class="search-container">
-          <input type="text" placeholder="搜索" class="search-input" v-model="searchQuery" />
-          <i class="iconfont icon-search" @click="performSearch"></i>
-        </div>
         <template v-if="!isLoggedIn">
           <button @click="showLoginDialog" class="btn btn-login">登录</button>
           <button @click="showRegisterDialog" class="btn btn-register">注册</button>
@@ -60,7 +56,6 @@ const isRegisterDialogVisible = ref(false)
 const isDropdownOpen = ref(false)
 const dropdownRef = ref(null)
 const isActive = ref('all')
-const searchQuery = ref('')
 const isCreatePostDialogVisible = ref(false)
 
 const showLoginDialog = () => {
@@ -133,13 +128,6 @@ const setActive = (item) => {
   isActive.value = item
 }
 
-const performSearch = () => {
-  if (searchQuery.value.trim()) {
-    console.log('搜索:', searchQuery.value)
-    // 在这里实现搜索的逻辑，比如导航到搜索结果页面
-  }
-}
-
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
@@ -202,34 +190,6 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.search-container {
-  position: relative;
-}
-
-.search-input {
-  padding: 5px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.search-input:hover {
-  border-color: var(--primary-color);
-  /* 定义悬浮时的边框色 */
-}
-
-.icon-search {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  color: #888;
-  /* 设置图标颜色为灰色 */
 }
 
 .btn {

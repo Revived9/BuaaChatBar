@@ -3,10 +3,31 @@
     <div class="filters">
       <div class="filter-container">
         <div class="sort-options">
-          <select v-model="currentSort" @change="handleSortChange">
-            <option value="hot">热门</option>
-            <option value="new">最新发布</option>
-          </select>
+          <el-select
+            v-model="currentSort"
+            @change="handleSortChange"
+            class="sort-select"
+            size="large"
+          >
+            <el-option 
+              value="hot"
+              label="热门"
+            >
+              <span class="option-label">
+                <i class="mdi mdi-fire"></i>
+                热门
+              </span>
+            </el-option>
+            <el-option 
+              value="new"
+              label="最新发布"
+            >
+              <span class="option-label">
+                <i class="mdi mdi-clock-outline"></i>
+                最新发布
+              </span>
+            </el-option>
+          </el-select>
         </div>
 <!--        <div class="search-container">-->
 <!--          <input type="text" placeholder="搜索" class="search-input" v-model="searchQuery" />-->
@@ -105,6 +126,10 @@ const navigateToPost = async (postId) => {
     console.error('获取帖子失败:', error);
   }
 };
+
+const handleSortChange = (value) => {
+  currentSort.value = value
+}
 </script>
 
 <script>
@@ -114,6 +139,22 @@ const navigateToPost = async (postId) => {
 <style scoped>
 .home {
   width: 100%;
+}
+
+.sort-select {
+  width: 160px;
+  margin: 20px 0 0 0;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-label i {
+  font-size: 1.2em;
+  color: var(--primary-color);
 }
 
 .content-wrapper {
@@ -134,27 +175,6 @@ const navigateToPost = async (postId) => {
   gap: 10px;
   margin-bottom: 10px;
 }
-
-.sort-options button,
-.filter-options button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px 10px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.sort-options button.active,
-.filter-options button.active {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-
-/* .sort-options, .filter-options:hover {
-  border-color: black; 
-} */
 
 .post-item {
   display: flex;
@@ -235,21 +255,6 @@ const navigateToPost = async (postId) => {
   }
 }
 
-.sort-options select {
-  padding: 5px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: white;
-  font-size: 0.9rem;
-  color: var(--text-color);
-  cursor: pointer;
-}
-
-.sort-options select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
-
 .filter-container {
   display: flex;
   justify-content: flex-start;
@@ -259,63 +264,6 @@ const navigateToPost = async (postId) => {
 .sort-options,
 .filter-options {
   position: relative;
-  width: 150px;
+  width: 120px;
 }
-
-.sort-options select,
-.filter-options select {
-  width: 100%;
-  height: 40px;
-  padding: 5px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: white;
-  font-size: 0.9rem;
-  color: var(--text-color);
-  cursor: pointer;
-}
-
-.sort-options select:hover,
-.filter-options select:hover {
-  background-color: var(--hover-color);
-  /* 定义悬浮时的背景色 */
-  border-color: var(--primary-color);
-  /* 定义悬浮时的边框色 */
-}
-
-.sort-options select:focus,
-.filter-options select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
-
-/* 自定义下拉列表选项样式 */
-.sort-options select option,
-.filter-options select option {
-  padding: 10px;
-  background-color: white;
-  color: var(--text-color);
-}
-
-/* 使用 ::-ms-expand 来隐藏 IE 中的下拉箭头 */
-.sort-options select::-ms-expand,
-.filter-options select::-ms-expand {
-  display: none;
-}
-
-/* 使用 ::selection 来自定义选中时的背景色 */
-.sort-options select option::selection,
-.filter-options select option::selection {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-/* 使用 :checked 伪类来自定义选中项的样式 */
-.sort-options select option:checked,
-.filter-options select option:checked {
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
-}
-
-/* 其他样式保持不变 */
 </style>

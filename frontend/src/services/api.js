@@ -104,22 +104,20 @@ export const usernamemodify = async (username) => {
 }
 
 //修改用户头像
-// 使用 FormData 发送文件
 export const avatermodify = async (avater) => {
   const formData = new FormData();
-  formData.append('user_id', avater.user_id); // 'avatar' 是后端接收文件的字段名
+  formData.append('user_id', avater.user_id);
   formData.append('new_avatar',avater.new_avatar);
   formData.append('image',avater.image);
   try {
-    console.log(formData)
     const response = await axios.post('http://127.0.0.1:8000/AvaterModify', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data' // 设置请求头，指示请求体类型
+        'Content-Type': 'multipart/form-data'
       }
     });
     return response;
   } catch (error) {
-    throw new Error('BAD avatermodify');
+    throw new Error('头像上传失败');
   }
 }
 
@@ -409,3 +407,18 @@ export const getUserProfile = (studentId) => {
 };
 
 export const updateUserProfile = (userData) => api.put('/user/profile', userData);
+
+// 获取用户头像
+export const getUserAvatar = async (userId) => {
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/GetUserAvatar', 
+      JSON.stringify({ user_id: userId }), {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response;
+  } catch (error) {
+    throw new Error('获取用户头像失败');
+  }
+}

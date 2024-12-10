@@ -28,13 +28,13 @@ const sections = [
     icon: 'mdi mdi-history',
     isFilter: true
   },
-  {
-    id: 'following',
-    name: '我的关注',
-    icon: 'mdi mdi-star-outline',
-    isFilter: true,
-    requireLogin: true
-  },
+  // {
+  //   id: 'following',
+  //   name: '我的关注',
+  //   icon: 'mdi mdi-star-outline',
+  //   isFilter: true,
+  //   requireLogin: true
+  // },
   // 特色板块（使用自定义颜色）
   {
     id: 'announcement',
